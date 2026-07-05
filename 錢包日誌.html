@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="錢包日誌">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC10lEQVR4nO3d0U3bABRA0VD1H6YrW8AsHaPbdYR+REJV4aoiUL/X5JwFYj9dP1tWCHf3T99O8JYv0wfAXuIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgfZ0+gPTz+4/pQzjOw/Pj9CG84W7b/5W9qSZeW1XJrtvKjZdxWjaBLZtj1VA22LBCVmwOZby2YSbzcWyYwk7jk5mPg7WG4xi/OJabnc/kA+lfz3zDQ9kB1s5h6UuwG8ni7HyyC5foxmeOmyrjxcKzHotj4YWy1tSs1m2OhRfQYbad+7o42EMcJHGQxEESB0kcpKVvSP8v1/rORhwfcq1ZnLmtXO66yziJ42JXX8ZJHJc5voyRFsVBEse7Td1Qjv9ccZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcbzb1O/vHP+54iCJ4xLHX8Qj60ocF9r2427/gjgud/V9iONDHp4frzgRv8/xCT6xj1V/vG9zkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHKR1caz6tsvBtp37WBxX/O26Tzc1q3Wb47TvAjrGwrNe+h3S86RuZLsszOLs7v7p2+DHr53LHoNXyPBt5UZ2w8Vm57PxmYMl5uOwPMr4ZObjOC2YwkIbZjL8QPoHz6enHVmcrdgcL/bMZcqqCezaHL+7qS2yqokXe+Ng3K7bCquIgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0i+ICm4FWqV6SgAAAABJRU5ErkJggg==">
+<title>錢包日誌</title>
+<style>
+:root{
+  --bg:#FAFAF8; --surface:#FFFFFF; --surface-2:#F3F2ED;
+  --border:rgba(0,0,0,0.09); --border-strong:rgba(0,0,0,0.16);
+  --text:#1A1A18; --text-secondary:#6B6A63; --text-muted:#9B9A92;
+  --accent:#0F6E56; --accent-bg:#E1F5EE;
+  --danger:#993C1D; --danger-bg:#FAECE7;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#17181A; --surface:#212327; --surface-2:#292B2F;
+    --border:rgba(255,255,255,0.10); --border-strong:rgba(255,255,255,0.2);
+    --text:#F0F0EE; --text-secondary:#A9A9A2; --text-muted:#77766F;
+    --accent:#5DCAA5; --accent-bg:#0F3A31;
+    --danger:#F0997B; --danger-bg:#4A2318;
+  }
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif; -webkit-font-smoothing:antialiased;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit; font-size:14px; padding:8px 10px; border-radius:8px; border:0.5px solid var(--border-strong); background:var(--surface); color:var(--text);}
+.btn{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; border:0.5px solid var(--border-strong); background:var(--surface); color:var(--text); font-size:14px; transition:background .15s;}
+.btn:hover{background:var(--surface-2);}
+.btn-primary{background:var(--accent); color:#fff; border-color:var(--accent);}
+.btn-primary:hover{opacity:.9;}
+.btn-danger{color:var(--danger);}
+.icon{width:18px; height:18px; flex-shrink:0;}
+.app{display:flex; min-height:100vh; max-width:1180px; margin:0 auto;}
+.sidebar{width:180px; flex-shrink:0; padding:24px 12px; border-right:0.5px solid var(--border); display:flex; flex-direction:column; gap:2px;}
+.sidebar h1{font-size:17px; font-weight:500; padding:0 10px 20px; margin:0;}
+.navitem{display:flex; align-items:center; gap:10px; padding:10px 10px; border-radius:8px; color:var(--text-secondary); font-size:14px; background:none; border:none; text-align:left; width:100%;}
+.navitem:hover{background:var(--surface-2);}
+.navitem.active{background:var(--accent-bg); color:var(--accent); font-weight:500;}
+.content{flex:1; padding:24px 32px; min-width:0;}
+.tab{display:none;}
+.tab.active{display:block;}
+.row-between{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+h2.pagetitle{font-size:20px; font-weight:500; margin:0;}
+.cards{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-bottom:20px;}
+.card{background:var(--surface-2); border-radius:var(--radius); padding:16px;}
+.card p.label{font-size:13px; color:var(--text-secondary); margin:0 0 6px;}
+.card p.value{font-size:22px; font-weight:500; margin:0;}
+.panel{background:var(--surface); border:0.5px solid var(--border); border-radius:12px; padding:20px 24px;}
+.calendar-wrap{display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;}
+.cal-col{min-width:0;}
+.cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.cal-nav span{font-size:15px; font-weight:500;}
+.cal-nav button{background:none; border:none; color:var(--text-secondary); padding:4px;}
+.weekdays{display:grid; grid-template-columns:repeat(7,1fr); text-align:center; font-size:11px; color:var(--text-muted); margin-bottom:4px;}
+.caldays{display:grid; grid-template-columns:repeat(7,1fr); gap:3px;}
+.calday{text-align:center; padding:6px 0; border-radius:6px; font-size:12px; color:var(--text-secondary); background:none; border:none; position:relative;}
+.calday:hover{background:var(--surface-2);}
+.calday.selected{background:var(--accent); color:#fff; font-weight:500;}
+.calday .dot{width:4px; height:4px; border-radius:50%; background:var(--text-muted); margin:2px auto 0;}
+.calday.selected .dot{background:#fff;}
+.detail-col{flex:1; min-width:0;}
+.txn-row{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:0.5px solid var(--border);}
+.txn-row:last-child{border-bottom:none;}
+.cat-badge{width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-size:15px;}
+.txn-info{flex:1; min-width:0;}
+.txn-info p{margin:0;}
+.txn-name{font-size:14px;}
+.txn-meta{font-size:12px; color:var(--text-secondary); margin-top:2px !important;}
+.txn-amount{font-size:14px; font-weight:500; white-space:nowrap;}
+.txn-actions{display:flex; gap:4px; margin-left:8px;}
+.txn-actions button{background:none; border:none; color:var(--text-muted); padding:4px;}
+.txn-actions button:hover{color:var(--text);}
+.empty{color:var(--text-muted); font-size:14px; padding:24px 0; text-align:center;}
+.list-row{display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:0.5px solid var(--border);}
+.list-row:last-child{border-bottom:none;}
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{text-align:right; font-size:12px; color:var(--text-muted); font-weight:400; padding:8px 4px; border-bottom:0.5px solid var(--border);}
+th:first-child, td:first-child{text-align:left;}
+td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--surface); border-radius:12px; padding:22px 24px; width:100%; max-width:400px; max-height:90vh; overflow-y:auto;}
+.modal h3{margin:0 0 16px; font-size:17px; font-weight:500;}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:13px; color:var(--text-secondary); margin-bottom:6px;}
+.field input, .field select{width:100%;}
+.toggle-group{display:flex; gap:8px; margin-bottom:14px;}
+.toggle-btn{flex:1; padding:9px; border-radius:8px; border:0.5px solid var(--border-strong); background:var(--surface); text-align:center; font-size:14px; color:var(--text-secondary);}
+.toggle-btn.active{background:var(--accent-bg); color:var(--accent); border-color:var(--accent); font-weight:500;}
+.modal-actions{display:flex; gap:8px; margin-top:18px;}
+.modal-actions button{flex:1;}
+.text-pos{color:var(--accent);}
+.text-neg{color:var(--danger);}
+.month-picker{display:flex; align-items:center; gap:12px;}
+.month-picker button{background:none; border:none; color:var(--text-secondary);}
+.bar-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+.bar-label{width:50px; font-size:12px; color:var(--text-secondary); flex-shrink:0;}
+.bar-track{flex:1; height:8px; background:var(--surface-2); border-radius:4px; overflow:hidden;}
+.bar-fill{height:100%; border-radius:4px;}
+.bar-value{width:80px; text-align:right; font-size:12px; color:var(--text-secondary); flex-shrink:0;}
+@media (max-width:760px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%; flex-direction:row; overflow-x:auto; border-right:none; border-bottom:0.5px solid var(--border); padding:12px;}
+  .sidebar h1{display:none;}
+  .navitem{white-space:nowrap; width:auto;}
+  .calendar-wrap{grid-template-columns:1fr;}
+  .cal-col{width:100%;}
+  .cards{grid-template-columns:1fr 1fr !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="sidebar">
+    <h1>錢包日誌</h1>
+    <button class="navitem active" data-tab="calendar"></button>
+    <button class="navitem" data-tab="analysis"></button>
+    <button class="navitem" data-tab="accounts"></button>
+    <button class="navitem" data-tab="invest"></button>
+    <button class="navitem" data-tab="settings"></button>
+  </nav>
+
+  <main class="content">
+    <section id="tab-calendar" class="tab active"></section>
+    <section id="tab-analysis" class="tab"></section>
+    <section id="tab-accounts" class="tab"></section>
+    <section id="tab-invest" class="tab"></section>
+    <section id="tab-settings" class="tab"></section>
+  </main>
+</div>
+
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div id="modal-content" class="modal"></div>
+</div>
+
+<input type="file" id="importFile" accept="application/json" style="display:none">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+/* ---------- icons ---------- */
+const ICON = {
+  calendar:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
+  chart:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>',
+  wallet:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 14h2"/></svg>',
+  trend:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 16l6-6 4 4 6-8M14 6h6v6"/></svg>',
+  settings:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3"/><path d="M4 12h2M18 12h2M12 4v2M12 18v2M6.3 6.3l1.4 1.4M16.3 16.3l1.4 1.4M6.3 17.7l1.4-1.4M16.3 7.7l1.4-1.4"/></svg>',
+  plus:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 5v14M5 12h14"/></svg>',
+  trash:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  edit:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20h4L18 10l-4-4L4 16v4z"/></svg>',
+  x:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chevL:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M15 6l-6 6 6 6"/></svg>',
+  chevR:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M9 6l6 6-6 6"/></svg>',
+  chevUp:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="width:15px;height:15px;"><path d="M6 15l6-6 6 6"/></svg>',
+  chevDown:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" style="width:15px;height:15px;"><path d="M6 9l6 6 6-6"/></svg>',
+  download:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 4v12M6 12l6 6 6-6M5 20h14"/></svg>',
+  upload:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 20V8M6 12l6-6 6 6M5 20h14"/></svg>',
+  refresh:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20 11a8 8 0 10-2.3 5.7M20 5v6h-6"/></svg>'
+};
+document.querySelector('[data-tab=calendar]').innerHTML = ICON.calendar+'月曆';
+document.querySelector('[data-tab=analysis]').innerHTML = ICON.chart+'分析';
+document.querySelector('[data-tab=accounts]').innerHTML = ICON.wallet+'帳戶';
+document.querySelector('[data-tab=invest]').innerHTML = ICON.trend+'投資';
+document.querySelector('[data-tab=settings]').innerHTML = ICON.settings+'設定';
+
+/* ---------- categories ---------- */
+const DEFAULT_EXPENSE_CATS = [
+  {name:'餐飲', color:'#D85A30'}, {name:'交通', color:'#7F77DD'}, {name:'娛樂', color:'#D4537E'},
+  {name:'居家', color:'#1D9E75'}, {name:'購物', color:'#BA7517'}, {name:'醫療', color:'#378ADD'}, {name:'其他', color:'#888780'}
+];
+const DEFAULT_INCOME_CATS = [
+  {name:'薪資', color:'#1D9E75'}, {name:'獎金', color:'#BA7517'}, {name:'投資收益', color:'#7F77DD'}, {name:'其他', color:'#888780'}
+];
+const CAT_PALETTE = ['#D85A30','#7F77DD','#D4537E','#1D9E75','#BA7517','#378ADD','#888780','#0F6E56','#993C1D','#2E7DBD'];
+function catColor(name){
+  const all = state.categories.expense.concat(state.categories.income);
+  const f = all.find(c=>c.name===name);
+  return f ? f.color : '#888780';
+}
+
+/* ---------- taiwan stock list ---------- */
+const TAIWAN_STOCKS = [
+  {symbol:'1101', name:'台泥'}, {symbol:'1102', name:'亞泥'}, {symbol:'1103', name:'嘉泥'},
+  {symbol:'1104', name:'環泥'}, {symbol:'1108', name:'幸福'}, {symbol:'1109', name:'信大'},
+  {symbol:'1110', name:'東泥'}, {symbol:'1201', name:'味全'}, {symbol:'1203', name:'味王'},
+  {symbol:'1210', name:'大成'}, {symbol:'1213', name:'大飲'}, {symbol:'1216', name:'統一'},
+  {symbol:'1217', name:'愛之味'}, {symbol:'1218', name:'泰山'}, {symbol:'1219', name:'福壽'},
+  {symbol:'1220', name:'台榮'}, {symbol:'1225', name:'福懋油'}, {symbol:'1227', name:'佳格'},
+  {symbol:'1229', name:'聯華'}, {symbol:'1231', name:'聯華食'}, {symbol:'1232', name:'大統益'},
+  {symbol:'1233', name:'天仁'}, {symbol:'1234', name:'黑松'}, {symbol:'1235', name:'興泰'},
+  {symbol:'1236', name:'宏亞'}, {symbol:'1256', name:'鮮活果汁-KY'}, {symbol:'1301', name:'台塑'},
+  {symbol:'1303', name:'南亞'}, {symbol:'1304', name:'台聚'}, {symbol:'1305', name:'華夏'},
+  {symbol:'1307', name:'三芳'}, {symbol:'1308', name:'亞聚'}, {symbol:'1309', name:'台達化'},
+  {symbol:'1310', name:'台苯'}, {symbol:'1312', name:'國喬'}, {symbol:'1313', name:'聯成'},
+  {symbol:'1314', name:'中石化'}, {symbol:'1315', name:'達新'}, {symbol:'1316', name:'上曜'},
+  {symbol:'1319', name:'東陽'}, {symbol:'1321', name:'大洋'}, {symbol:'1323', name:'永裕'},
+  {symbol:'1326', name:'台化'}, {symbol:'1339', name:'昭輝'}, {symbol:'1341', name:'富林'},
+  {symbol:'1402', name:'遠東新'}, {symbol:'1409', name:'新纖'}, {symbol:'1410', name:'南染'},
+  {symbol:'1413', name:'宏洲'}, {symbol:'1414', name:'東和'}, {symbol:'1416', name:'廣豐'},
+  {symbol:'1417', name:'嘉裕'}, {symbol:'1418', name:'東華'}, {symbol:'1419', name:'新紡'},
+  {symbol:'1423', name:'利華'}, {symbol:'1432', name:'大魯閣'}, {symbol:'1436', name:'華友聯'},
+  {symbol:'1440', name:'南紡'}, {symbol:'1441', name:'大東'}, {symbol:'1443', name:'立益'},
+  {symbol:'1447', name:'力鵬'}, {symbol:'1449', name:'佳和'}, {symbol:'1451', name:'年興'},
+  {symbol:'1452', name:'宏益'}, {symbol:'1453', name:'大將'}, {symbol:'1454', name:'台富'},
+  {symbol:'1455', name:'集盛'}, {symbol:'1456', name:'怡華'}, {symbol:'1457', name:'宜進'},
+  {symbol:'1459', name:'聯發'}, {symbol:'1460', name:'宏遠'}, {symbol:'1463', name:'強力'},
+  {symbol:'1464', name:'得力'}, {symbol:'1465', name:'偉全'}, {symbol:'1466', name:'聚隆'},
+  {symbol:'1467', name:'南緯'}, {symbol:'1468', name:'名軒'}, {symbol:'1470', name:'大統新創'},
+  {symbol:'1471', name:'首利'}, {symbol:'1472', name:'三洋實業'}, {symbol:'1473', name:'台南'},
+  {symbol:'1474', name:'弘裕'}, {symbol:'1475', name:'業旺'}, {symbol:'1476', name:'儒鴻'},
+  {symbol:'1477', name:'聚陽'}, {symbol:'1503', name:'士電'}, {symbol:'1504', name:'東元'},
+  {symbol:'1506', name:'正道'}, {symbol:'1512', name:'瑞利'}, {symbol:'1513', name:'中興電'},
+  {symbol:'1514', name:'亞力'}, {symbol:'1515', name:'力山'}, {symbol:'1516', name:'川飛'},
+  {symbol:'1517', name:'利奇'}, {symbol:'1519', name:'華城'}, {symbol:'1521', name:'大億'},
+  {symbol:'1522', name:'堤維西'}, {symbol:'1524', name:'耿豐'}, {symbol:'1525', name:'江申'},
+  {symbol:'1526', name:'日馳'}, {symbol:'1527', name:'鑫永銓'}, {symbol:'1528', name:'恩德'},
+  {symbol:'1529', name:'樂士'}, {symbol:'1530', name:'亞崴'}, {symbol:'1531', name:'高林股'},
+  {symbol:'1532', name:'勤美'}, {symbol:'1533', name:'車王電'}, {symbol:'1535', name:'中宇'},
+  {symbol:'1536', name:'和大'}, {symbol:'1537', name:'廣隆'}, {symbol:'1538', name:'正峰'},
+  {symbol:'1540', name:'喬福'}, {symbol:'1541', name:'錩泰'}, {symbol:'1558', name:'伸興'},
+  {symbol:'1560', name:'中砂'}, {symbol:'1568', name:'倚天'}, {symbol:'1580', name:'新麥'},
+  {symbol:'1582', name:'信錦'}, {symbol:'1583', name:'程泰'}, {symbol:'1587', name:'吉茂'},
+  {symbol:'1589', name:'永冠-KY'}, {symbol:'1590', name:'亞德客-KY'},
+  {symbol:'1598', name:'岱宇'}, {symbol:'1603', name:'華電'}, {symbol:'1604', name:'聲寶'},
+  {symbol:'1605', name:'華新'}, {symbol:'1608', name:'華榮'}, {symbol:'1609', name:'大亞'},
+  {symbol:'1611', name:'中電'}, {symbol:'1612', name:'宏泰'}, {symbol:'1614', name:'三洋電'},
+  {symbol:'1615', name:'大山'}, {symbol:'1616', name:'億泰'}, {symbol:'1617', name:'榮星'},
+  {symbol:'1618', name:'合機'}, {symbol:'1626', name:'艾美特-KY'}, {symbol:'1701', name:'中化'},
+  {symbol:'1702', name:'南僑'}, {symbol:'1707', name:'葡萄王'}, {symbol:'1708', name:'東鹼'},
+  {symbol:'1709', name:'和益'}, {symbol:'1710', name:'東聯'}, {symbol:'1711', name:'永光'},
+  {symbol:'1712', name:'興農'}, {symbol:'1713', name:'國際'}, {symbol:'1714', name:'和桐'},
+  {symbol:'1717', name:'長興'}, {symbol:'1718', name:'中纖'},
+  {symbol:'1720', name:'生達'}, {symbol:'1721', name:'三晃'}, {symbol:'1722', name:'台肥'},
+  {symbol:'1723', name:'中碳'}, {symbol:'1725', name:'元禎'}, {symbol:'1726', name:'永記'},
+  {symbol:'1727', name:'中華化'}, {symbol:'1730', name:'花仙子'}, {symbol:'1731', name:'美吾華'},
+  {symbol:'1732', name:'毛寶'}, {symbol:'1733', name:'五鼎'}, {symbol:'1734', name:'杏輝'},
+  {symbol:'1735', name:'日勝化'}, {symbol:'1736', name:'喬山'}, {symbol:'1737', name:'臺鹽'},
+  {symbol:'1738', name:'和成'}, {symbol:'1739', name:'昱泰'}, {symbol:'1740', name:'興農-KY'},
+  {symbol:'1741', name:'龍燈-KY'}, {symbol:'1904', name:'正隆'}, {symbol:'1907', name:'永豐餘'},
+  {symbol:'1909', name:'榮成'}, {symbol:'2002', name:'中鋼'}, {symbol:'2006', name:'東和鋼鐵'},
+  {symbol:'2007', name:'燁興'}, {symbol:'2008', name:'高興昌'}, {symbol:'2009', name:'第一銅'},
+  {symbol:'2010', name:'春源'}, {symbol:'2012', name:'春雨'}, {symbol:'2013', name:'中鋼構'},
+  {symbol:'2014', name:'中鴻'}, {symbol:'2015', name:'豐興'}, {symbol:'2017', name:'官田鋼'},
+  {symbol:'2020', name:'美亞'}, {symbol:'2022', name:'聚亨'}, {symbol:'2023', name:'燁輝'},
+  {symbol:'2024', name:'志聯'}, {symbol:'2025', name:'千興'}, {symbol:'2027', name:'大成鋼'},
+  {symbol:'2028', name:'威致'}, {symbol:'2029', name:'盛餘'}, {symbol:'2030', name:'彰源'},
+  {symbol:'2031', name:'新光鋼'}, {symbol:'2032', name:'新鋼'}, {symbol:'2033', name:'佳大'},
+  {symbol:'2034', name:'允強'}, {symbol:'2038', name:'海光'}, {symbol:'2049', name:'上銀'},
+  {symbol:'2059', name:'川湖'}, {symbol:'2062', name:'橋椿'}, {symbol:'2101', name:'南港'},
+  {symbol:'2103', name:'台橡'}, {symbol:'2104', name:'中橡'}, {symbol:'2105', name:'正新'},
+  {symbol:'2106', name:'建大'}, {symbol:'2107', name:'厚生'}, {symbol:'2108', name:'南帝'},
+  {symbol:'2109', name:'華豐'}, {symbol:'2114', name:'鑫祥'}, {symbol:'2201', name:'裕隆'},
+  {symbol:'2204', name:'中華'}, {symbol:'2206', name:'三陽工業'}, {symbol:'2207', name:'和泰車'},
+  {symbol:'2208', name:'台船'}, {symbol:'2211', name:'長榮鋼'}, {symbol:'2227', name:'裕日車'},
+  {symbol:'2228', name:'劍麟'}, {symbol:'2231', name:'為升'}, {symbol:'2233', name:'宇隆'},
+  {symbol:'2236', name:'百達-KY'}, {symbol:'2239', name:'英利-KY'}, {symbol:'2241', name:'知洋'},
+  {symbol:'2243', name:'宏旭-KY'}, {symbol:'2247', name:'汎德永業'}, {symbol:'2301', name:'光寶科'},
+  {symbol:'2302', name:'麗正'}, {symbol:'2303', name:'聯電'}, {symbol:'2308', name:'台達電'},
+  {symbol:'2312', name:'金寶'}, {symbol:'2313', name:'華通'},
+  {symbol:'2314', name:'台揚'}, {symbol:'2316', name:'楠梓電'}, {symbol:'2317', name:'鴻海'},
+  {symbol:'2321', name:'東訊'}, {symbol:'2323', name:'中環'}, {symbol:'2324', name:'仁寶'},
+  {symbol:'2327', name:'國巨'}, {symbol:'2328', name:'廣宇'},
+  {symbol:'2329', name:'華泰'}, {symbol:'2330', name:'台積電'}, {symbol:'2331', name:'精英'},
+  {symbol:'2332', name:'友訊'}, {symbol:'2337', name:'旺宏'}, {symbol:'2338', name:'光罩'},
+  {symbol:'2340', name:'台亞'}, {symbol:'2342', name:'茂矽'}, {symbol:'2344', name:'華邦電'},
+  {symbol:'2345', name:'智邦'}, {symbol:'2347', name:'聯強'}, {symbol:'2348', name:'力廣'},
+  {symbol:'2349', name:'錸德'}, {symbol:'2352', name:'佳世達'},
+  {symbol:'2353', name:'宏碁'}, {symbol:'2354', name:'鴻準'}, {symbol:'2355', name:'敬鵬'},
+  {symbol:'2356', name:'英業達'}, {symbol:'2357', name:'華碩'}, {symbol:'2358', name:'廷鑫'},
+  {symbol:'2359', name:'所羅門'}, {symbol:'2360', name:'致茂'}, {symbol:'2362', name:'藍天'},
+  {symbol:'2363', name:'矽統'}, {symbol:'2364', name:'倍必達'}, {symbol:'2365', name:'昆盈'},
+  {symbol:'2367', name:'燿華'}, {symbol:'2368', name:'金像電'}, {symbol:'2369', name:'菱生'},
+  {symbol:'2371', name:'大同'}, {symbol:'2373', name:'震旦行'}, {symbol:'2374', name:'佳能'},
+  {symbol:'2375', name:'智寶'}, {symbol:'2376', name:'技嘉'}, {symbol:'2377', name:'微星'},
+  {symbol:'2379', name:'瑞昱'}, {symbol:'2380', name:'虹光'}, {symbol:'2381', name:'華宇'},
+  {symbol:'2382', name:'廣達'}, {symbol:'2383', name:'台光電'}, {symbol:'2385', name:'群光'},
+  {symbol:'2387', name:'精元'}, {symbol:'2388', name:'威盛'}, {symbol:'2390', name:'云辰'},
+  {symbol:'2392', name:'正崴'}, {symbol:'2393', name:'億光'}, {symbol:'2395', name:'研華'},
+  {symbol:'2397', name:'友通'}, {symbol:'2399', name:'映鈦'}, {symbol:'2401', name:'凌陽'},
+  {symbol:'2402', name:'毅嘉'}, {symbol:'2404', name:'漢唐'}, {symbol:'2408', name:'南亞科'},
+  {symbol:'2409', name:'友達'}, {symbol:'2412', name:'中華電'}, {symbol:'2413', name:'環科'},
+  {symbol:'2414', name:'精技'}, {symbol:'2415', name:'錩新'}, {symbol:'2417', name:'圓剛'},
+  {symbol:'2419', name:'仲琦'}, {symbol:'2420', name:'新巨'}, {symbol:'2421', name:'建準'},
+  {symbol:'2423', name:'固緯'}, {symbol:'2424', name:'隴華'}, {symbol:'2425', name:'承啟'},
+  {symbol:'2426', name:'鼎元'}, {symbol:'2427', name:'三商電'}, {symbol:'2428', name:'興勤'},
+  {symbol:'2429', name:'銘旺科'}, {symbol:'2430', name:'燦坤'}, {symbol:'2431', name:'聯昌'},
+  {symbol:'2433', name:'互盛電'}, {symbol:'2434', name:'統懋'}, {symbol:'2436', name:'偉詮電'},
+  {symbol:'2438', name:'英誌'}, {symbol:'2439', name:'美律'}, {symbol:'2441', name:'超豐'},
+  {symbol:'2442', name:'新美齊'}, {symbol:'2443', name:'台睿'}, {symbol:'2449', name:'京元電子'},
+  {symbol:'2450', name:'神腦'}, {symbol:'2451', name:'創見'}, {symbol:'2454', name:'聯發科'},
+  {symbol:'2456', name:'新普'}, {symbol:'2457', name:'飛宏'}, {symbol:'2458', name:'義隆'},
+  {symbol:'2459', name:'敦吉'}, {symbol:'2460', name:'建通'}, {symbol:'2464', name:'盟立'},
+  {symbol:'2467', name:'志聖'}, {symbol:'2468', name:'華經'}, {symbol:'2471', name:'資通'},
+  {symbol:'2472', name:'立隆電'}, {symbol:'2474', name:'可成'}, {symbol:'2476', name:'鉅祥'},
+  {symbol:'2477', name:'美隆電'}, {symbol:'2478', name:'大毅'}, {symbol:'2481', name:'強茂'},
+  {symbol:'2482', name:'連宇'}, {symbol:'2483', name:'百容'}, {symbol:'2485', name:'兆赫'},
+  {symbol:'2486', name:'一詮'}, {symbol:'2488', name:'漢平'}, {symbol:'2489', name:'瑞軒'},
+  {symbol:'2491', name:'吉祥全'}, {symbol:'2492', name:'華新科'}, {symbol:'2493', name:'揚博'},
+  {symbol:'2495', name:'普安'}, {symbol:'2496', name:'卓越'}, {symbol:'2497', name:'怡利電'},
+  {symbol:'2498', name:'宏達電'}, {symbol:'2499', name:'東貝'}, {symbol:'2501', name:'國建'},
+  {symbol:'2504', name:'國產'}, {symbol:'2505', name:'國揚'}, {symbol:'2506', name:'太設'},
+  {symbol:'2509', name:'全坤建'}, {symbol:'2511', name:'太子'}, {symbol:'2515', name:'中工'},
+  {symbol:'2516', name:'新建'}, {symbol:'2520', name:'冠德'}, {symbol:'2524', name:'京城'},
+  {symbol:'2527', name:'宏璟'}, {symbol:'2528', name:'皇普'}, {symbol:'2530', name:'華建'},
+  {symbol:'2534', name:'宏盛'}, {symbol:'2535', name:'達欣工'}, {symbol:'2536', name:'宏普'},
+  {symbol:'2537', name:'聯上發'}, {symbol:'2538', name:'基泰'}, {symbol:'2539', name:'櫻花建'},
+  {symbol:'2540', name:'愛山林'}, {symbol:'2542', name:'興富發'}, {symbol:'2543', name:'皇昌'},
+  {symbol:'2547', name:'日勝生'}, {symbol:'2548', name:'華固'}, {symbol:'2597', name:'潤弘'},
+  {symbol:'2601', name:'益航'}, {symbol:'2602', name:'福懋航'}, {symbol:'2603', name:'長榮'},
+  {symbol:'2605', name:'新興'}, {symbol:'2606', name:'裕民'}, {symbol:'2607', name:'榮運'},
+  {symbol:'2608', name:'大榮'}, {symbol:'2609', name:'陽明'}, {symbol:'2610', name:'華航'},
+  {symbol:'2611', name:'志信'}, {symbol:'2612', name:'中航'}, {symbol:'2613', name:'中連貨'},
+  {symbol:'2614', name:'東森'}, {symbol:'2615', name:'萬海'}, {symbol:'2616', name:'山隆'},
+  {symbol:'2617', name:'台航'}, {symbol:'2618', name:'長榮航'}, {symbol:'2633', name:'台灣高鐵'},
+  {symbol:'2634', name:'漢翔'}, {symbol:'2636', name:'台驊投控'}, {symbol:'2637', name:'慧洋-KY'},
+  {symbol:'2642', name:'宅配通'}, {symbol:'2701', name:'萬企'}, {symbol:'2702', name:'華園'},
+  {symbol:'2704', name:'國賓'}, {symbol:'2705', name:'六福'}, {symbol:'2706', name:'第一店'},
+  {symbol:'2707', name:'晶華'}, {symbol:'2712', name:'安慶'}, {symbol:'2722', name:'夏都'},
+  {symbol:'2723', name:'美食-KY'}, {symbol:'2727', name:'王品'}, {symbol:'2731', name:'雄獅'},
+  {symbol:'2740', name:'天蔥'}, {symbol:'2809', name:'京城銀'}, {symbol:'2812', name:'台中銀'},
+  {symbol:'2816', name:'旺旺保'}, {symbol:'2820', name:'華票'}, {symbol:'2823', name:'中壽'},
+  {symbol:'2832', name:'台產'}, {symbol:'2834', name:'臺企銀'}, {symbol:'2836', name:'高雄銀'},
+  {symbol:'2838', name:'聯邦銀'}, {symbol:'2841', name:'台開'}, {symbol:'2845', name:'遠東銀'},
+  {symbol:'2849', name:'安泰銀'}, {symbol:'2850', name:'新產'}, {symbol:'2851', name:'中再保'},
+  {symbol:'2852', name:'第一保'}, {symbol:'2855', name:'統一證'}, {symbol:'2856', name:'元富證'},
+  {symbol:'2867', name:'三商壽'}, {symbol:'2880', name:'華南金'}, {symbol:'2881', name:'富邦金'},
+  {symbol:'2882', name:'國泰金'}, {symbol:'2883', name:'開發金'}, {symbol:'2884', name:'玉山金'},
+  {symbol:'2885', name:'元大金'}, {symbol:'2886', name:'兆豐金'}, {symbol:'2887', name:'台新金'},
+  {symbol:'2888', name:'新光金'}, {symbol:'2889', name:'國票金'}, {symbol:'2890', name:'永豐金'},
+  {symbol:'2891', name:'中信金'}, {symbol:'2892', name:'第一金'}, {symbol:'2897', name:'王道銀行'},
+  {symbol:'2903', name:'遠百'}, {symbol:'2905', name:'南仁湖'}, {symbol:'2906', name:'高林'},
+  {symbol:'2915', name:'潤泰全'}, {symbol:'2923', name:'鼎固-KY'}, {symbol:'2929', name:'淘帝-KY'},
+  {symbol:'2939', name:'凱衛'}, {symbol:'3002', name:'綠點高新'}, {symbol:'3003', name:'健和興'},
+  {symbol:'3004', name:'豐達科'}, {symbol:'3005', name:'神基'}, {symbol:'3006', name:'晶豪科'},
+  {symbol:'3008', name:'大立光'}, {symbol:'3010', name:'華立'}, {symbol:'3011', name:'今皓'},
+  {symbol:'3013', name:'晟銘電'}, {symbol:'3015', name:'全漢'},
+  {symbol:'3017', name:'奇鋐'}, {symbol:'3018', name:'隆銘綠能'}, {symbol:'3019', name:'亞光'},
+  {symbol:'3021', name:'鴻名'}, {symbol:'3022', name:'威強電'}, {symbol:'3023', name:'信邦'},
+  {symbol:'3024', name:'憶聲'}, {symbol:'3025', name:'星通'}, {symbol:'3026', name:'禾伸堂'},
+  {symbol:'3027', name:'盛達'}, {symbol:'3028', name:'增你強'}, {symbol:'3029', name:'零壹'},
+  {symbol:'3030', name:'德律'}, {symbol:'3031', name:'佰鴻'}, {symbol:'3032', name:'偉訓'},
+  {symbol:'3033', name:'威健'}, {symbol:'3034', name:'聯詠'}, {symbol:'3035', name:'智原'},
+  {symbol:'3036', name:'文曄'}, {symbol:'3037', name:'欣興'}, {symbol:'3038', name:'全台'},
+  {symbol:'3040', name:'遠見'}, {symbol:'3041', name:'揚智'},
+  {symbol:'3043', name:'科風'}, {symbol:'3044', name:'健鼎'}, {symbol:'3045', name:'台灣大'},
+  {symbol:'3046', name:'建碁'}, {symbol:'3048', name:'益登'}, {symbol:'3049', name:'和鑫'},
+  {symbol:'3050', name:'鈺德'}, {symbol:'3051', name:'力特'}, {symbol:'3052', name:'綠能'},
+  {symbol:'3054', name:'立萬利'}, {symbol:'3055', name:'蔚華科'}, {symbol:'3056', name:'總太'},
+  {symbol:'3057', name:'喬鼎'}, {symbol:'3059', name:'華晶科'},
+  {symbol:'3231', name:'緯創'}, {symbol:'3406', name:'玉晶光'}, {symbol:'3443', name:'創意'},
+  {symbol:'3481', name:'群創'}, {symbol:'3533', name:'嘉澤'}, {symbol:'3653', name:'健策'},
+  {symbol:'3661', name:'世芯-KY'}, {symbol:'3711', name:'日月光投控'}, {symbol:'4904', name:'遠傳'},
+  {symbol:'4938', name:'和碩'}, {symbol:'5871', name:'中租-KY'}, {symbol:'5876', name:'上海商銀'},
+  {symbol:'5880', name:'合庫金'}, {symbol:'6415', name:'矽力-KY'}, {symbol:'6446', name:'藥華藥'},
+  {symbol:'6505', name:'台塑化'}, {symbol:'6669', name:'緯穎'}, {symbol:'6770', name:'力積電'},
+  {symbol:'8046', name:'南電'}, {symbol:'8299', name:'群聯'}, {symbol:'9910', name:'豐泰'},
+  {symbol:'9921', name:'巨大'}, {symbol:'9933', name:'中鼎'}, {symbol:'9941', name:'裕融'},
+  {symbol:'9945', name:'潤泰新'}, {symbol:'0050', name:'元大台灣50'}, {symbol:'0056', name:'元大高股息'},
+  {symbol:'00878', name:'國泰永續高股息'}, {symbol:'00919', name:'群益台灣精選高息'}, {symbol:'00929', name:'復華台灣科技優息'}
+];
+
+/* ---------- state ---------- */
+const today = new Date();
+const pad = n => String(n).padStart(2,'0');
+const dateStr = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
+function monthKey(y,m){ while(m<0){m+=12; y--;} while(m>11){m-=12; y++;} return `${y}-${pad(m+1)}`; }
+function monthKeyOfDate(dstr){ const d = new Date(dstr); return monthKey(d.getFullYear(), d.getMonth()); }
+function dateStrOffsetMonths(y,m,d,deltaMonths){ const dt = new Date(y, m+deltaMonths, d); return dateStr(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
+
+let state = {
+  categories: {
+    expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})),
+    income: DEFAULT_INCOME_CATS.map(c=>({...c}))
+  },
+  accounts: [],
+  transactions: [],
+  stockRecords: [],
+  feeRecords: [],
+  customStocks: []
+};
+
+const STORAGE_KEY = 'walletJournal_state_v2';
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ console.warn('無法儲存資料', e); }
+}
+(function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const saved = JSON.parse(raw);
+      if(saved && saved.categories){
+        if(!saved.accounts) saved.accounts = [];
+        if(!saved.transactions) saved.transactions = [];
+        if(!saved.stockRecords) saved.stockRecords = [];
+        if(!saved.feeRecords) saved.feeRecords = [];
+        if(!saved.customStocks) saved.customStocks = [];
+        state = saved;
+      }
+    }
+  }catch(e){ console.warn('無法讀取先前資料', e); }
+})();
+
+let calYear = today.getFullYear(), calMonth = today.getMonth();
+let selectedDay = today.getDate();
+let analysisYear = today.getFullYear(), analysisMonth = today.getMonth(), analysisMode = 'month';
+let invYear = today.getFullYear(), invMonth = today.getMonth(), invMode = 'month';
+
+function uid(){ return 'id'+Math.random().toString(36).slice(2,9); }
+function fmt(n){ return Math.round(n).toLocaleString('zh-Hant'); }
+function fmt2(n){ return n.toLocaleString('zh-Hant',{minimumFractionDigits:2, maximumFractionDigits:2}); }
+function fmtDate(dstr){ const d = new Date(dstr); return `${d.getMonth()+1}/${d.getDate()}`; }
+
+function accountBalance(acc){
+  let bal = acc.balance;
+  state.transactions.forEach(t=>{
+    if(t.account===acc.id){ bal += t.type==='income' ? t.amount : -t.amount; }
+  });
+  return bal;
+}
+
+/* ---------- tab switching ---------- */
+document.querySelectorAll('.navitem').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    renderAll();
+  });
+});
+function goToSettingsCategories(){
+  document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('active', b.dataset.tab==='settings'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-settings').classList.add('active');
+}
+
+/* ---------- modal helpers ---------- */
+const overlay = document.getElementById('modal-overlay');
+const modalContent = document.getElementById('modal-content');
+function openModal(html){ modalContent.innerHTML = html; overlay.classList.remove('hidden'); }
+function closeModal(){ overlay.classList.add('hidden'); modalContent.innerHTML=''; }
+overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal(); });
+
+/* ---------- calendar tab ---------- */
+function renderCalendar(){
+  const monthTxns = state.transactions.filter(t=>{
+    const d = new Date(t.date);
+    return d.getFullYear()===calYear && d.getMonth()===calMonth;
+  });
+  const income = monthTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = monthTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+  const daysWithData = new Set(monthTxns.map(t=>new Date(t.date).getDate()));
+
+  let calCells = '';
+  for(let i=0;i<firstDay;i++) calCells += '<div></div>';
+  for(let d=1; d<=daysInMonth; d++){
+    const isSel = d===selectedDay;
+    calCells += `<button class="calday ${isSel?'selected':''}" data-day="${d}">${d}${daysWithData.has(d)?'<div class="dot"></div>':'<div style="height:6px"></div>'}</button>`;
+  }
+
+  const dayTxns = state.transactions.filter(t=>t.date===dateStr(calYear,calMonth,selectedDay))
+    .sort((a,b)=>a.id<b.id?1:-1);
+  const dayIncome = dayTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const dayExpense = dayTxns.filter(t=>t.type==='expense').reduce((s,t)=>s+t.amount,0);
+
+  const weekday = new Date(calYear,calMonth,selectedDay).toLocaleDateString('zh-Hant-TW',{month:'long',day:'numeric',weekday:'long'});
+
+  let txnHtml = dayTxns.length ? dayTxns.map(t=>`
+    <div class="txn-row">
+      <div class="cat-badge" style="background:${catColor(t.category)}">${t.category.slice(0,1)}</div>
+      <div class="txn-info">
+        <p class="txn-name">${t.note||t.category}</p>
+        <p class="txn-meta">${t.category}</p>
+      </div>
+      <span class="txn-amount ${t.type==='income'?'text-pos':''}">${t.type==='income'?'+':'-'}NT$ ${fmt(t.amount)}</span>
+      <div class="txn-actions">
+        <button data-edit="${t.id}" aria-label="編輯">${ICON.edit}</button>
+        <button data-del="${t.id}" aria-label="刪除">${ICON.trash}</button>
+      </div>
+    </div>`).join('') : '<div class="empty">這天還沒有記錄</div>';
+
+  document.getElementById('tab-calendar').innerHTML = `
+    <div class="row-between">
+      <h2 class="pagetitle">${calYear} 年 ${calMonth+1} 月</h2>
+      <button class="btn btn-primary" id="btnAddTxn">${ICON.plus}快速記帳</button>
+    </div>
+    <div class="calendar-wrap panel">
+      <div class="cal-col">
+        <div class="cal-nav">
+          <button data-nav="-1">${ICON.chevL}</button>
+          <span>選擇日期</span>
+          <button data-nav="1">${ICON.chevR}</button>
+        </div>
+        <div class="weekdays"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+        <div class="caldays">${calCells}</div>
+      </div>
+      <div class="detail-col">
+        <div class="row-between" style="margin-bottom:12px;">
+          <div>
+            <p style="font-size:16px; font-weight:500; margin:0;">${weekday}</p>
+            <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 0;">收入 NT$ ${fmt(dayIncome)} · 支出 NT$ ${fmt(dayExpense)}</p>
+          </div>
+        </div>
+        ${txnHtml}
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll('.calday').forEach(b=>b.addEventListener('click', ()=>{ selectedDay=parseInt(b.dataset.day); renderCalendar(); }));
+  document.querySelectorAll('[data-nav]').forEach(b=>b.addEventListener('click', ()=>{
+    calMonth += parseInt(b.dataset.nav);
+    if(calMonth<0){calMonth=11; calYear--;} if(calMonth>11){calMonth=0; calYear++;}
+    const dim = new Date(calYear,calMonth+1,0).getDate();
+    if(selectedDay>dim) selectedDay=dim;
+    renderCalendar();
+  }));
+  document.getElementById('btnAddTxn').addEventListener('click', ()=>openTxnModal());
+  document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>openTxnModal(b.dataset.edit)));
+  document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
+    state.transactions = state.transactions.filter(t=>t.id!==b.dataset.del);
+    renderCalendar();
+  }));
+}
+
+function openTxnModal(editId, draft){
+  const editing = editId ? state.transactions.find(t=>t.id===editId) : null;
+  let type = editing ? editing.type : (draft ? draft.type : 'expense');
+  const dstr = editing ? editing.date : (draft ? draft.date : dateStr(calYear,calMonth,selectedDay));
+
+  function catOptions(){
+    const cats = state.categories[type];
+    const selected = editing ? editing.category : (draft ? draft.category : null);
+    return cats.map(c=>`<option value="${c.name}" ${selected===c.name?'selected':''}>${c.name}</option>`).join('')
+      || '<option value="">（尚無分類，請先新增）</option>';
+  }
+  function accOptions(){
+    if(!state.accounts.length) return '<option value="">（請先至帳戶頁面新增帳戶）</option>';
+    const selected = editing ? editing.account : (draft ? draft.account : null);
+    return state.accounts.map(a=>`<option value="${a.id}" ${selected===a.id?'selected':''}>${a.name}（NT$ ${fmt(accountBalance(a))}）</option>`).join('');
+  }
+
+  openModal(`
+    <h3>${editing?'編輯交易':'快速記帳'}</h3>
+    <div class="toggle-group">
+      <button type="button" class="toggle-btn ${type==='expense'?'active':''}" data-type="expense">支出</button>
+      <button type="button" class="toggle-btn ${type==='income'?'active':''}" data-type="income">收入</button>
+    </div>
+    <div class="field"><label>金額</label><input type="number" id="f-amount" value="${editing?editing.amount:(draft?draft.amount:'')}" placeholder="0"></div>
+    <div class="field">
+      <label>分類</label>
+      <div style="display:flex; gap:8px;">
+        <select id="f-cat" style="flex:1;">${catOptions()}</select>
+        <button type="button" class="btn" id="btnManageCat" style="padding:8px 10px;" aria-label="管理分類">${ICON.settings}</button>
+      </div>
+    </div>
+    <div class="field"><label>帳戶</label><select id="f-acc">${accOptions()}</select></div>
+    <div class="field"><label>日期</label><input type="date" id="f-date" value="${dstr}"></div>
+    <div class="field"><label>備註</label><input type="text" id="f-note" value="${editing?(editing.note||''):(draft?draft.note:'')}" placeholder="例如：午餐"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+
+  document.querySelectorAll('.toggle-btn').forEach(b=>b.addEventListener('click', ()=>{
+    type = b.dataset.type;
+    document.querySelectorAll('.toggle-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('f-cat').innerHTML = catOptions();
+  }));
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnManageCat').addEventListener('click', ()=>{
+    closeModal();
+    goToSettingsCategories();
+  });
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const amount = parseFloat(document.getElementById('f-amount').value);
+    if(!amount || amount<=0){ alert('請輸入有效金額'); return; }
+    const category = document.getElementById('f-cat').value;
+    if(!category){ alert('請先新增至少一個分類'); return; }
+    const account = document.getElementById('f-acc').value;
+    if(!account){ alert('請先新增至少一個帳戶'); return; }
+    const payload = {
+      type, amount, category, account,
+      date: document.getElementById('f-date').value,
+      note: document.getElementById('f-note').value
+    };
+    if(editing){ Object.assign(editing, payload); }
+    else { state.transactions.push({id:uid(), ...payload}); }
+    closeModal();
+    const d = new Date(payload.date);
+    calYear=d.getFullYear(); calMonth=d.getMonth(); selectedDay=d.getDate();
+    renderAll();
+  });
+}
+
+/* ---------- analysis tab ---------- */
+let analysisChart = null;
+let trendChart = null;
+function renderAnalysis(){
+  const isYear = analysisMode === 'year';
+
+  const scopedTxns = state.transactions.filter(t=>{
+    const d = new Date(t.date);
+    if(d.getFullYear()!==analysisYear) return false;
+    return isYear ? true : d.getMonth()===analysisMonth;
+  });
+  const expenseTxns = scopedTxns.filter(t=>t.type==='expense');
+  const income = scopedTxns.filter(t=>t.type==='income').reduce((s,t)=>s+t.amount,0);
+  const expense = expenseTxns.reduce((s,t)=>s+t.amount,0);
+
+  const byCat = {};
+  expenseTxns.forEach(t=>{ byCat[t.category] = (byCat[t.category]||0) + t.amount; });
+  const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+
+  const periodLabel = isYear ? '本年' : '本月';
+  const barsHtml = catEntries.length ? catEntries.map(([cat,amt])=>{
+    const pct = expense ? Math.round(amt/expense*100) : 0;
+    return `<div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${catColor(cat)}"></div></div>
+      <div class="bar-value">NT$ ${fmt(amt)} (${pct}%)</div>
+    </div>`;
+  }).join('') : `<div class="empty">${periodLabel}尚無支出紀錄</div>`;
+
+  const picker = isYear
+    ? `<button data-anav="-1">${ICON.chevL}</button><span>${analysisYear} 年</span><button data-anav="1">${ICON.chevR}</button>`
+    : `<button data-anav="-1">${ICON.chevL}</button><span>${analysisYear} 年 ${analysisMonth+1} 月</span><button data-anav="1">${ICON.chevR}</button>`;
+
+  const trendSection = isYear ? `
+    <div class="panel" style="margin-bottom:16px;">
+      <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">每月收支趨勢</p>
+      <div style="position:relative; height:220px;">
+        <canvas id="trendChart" role="img" aria-label="${analysisYear}年每月收入與支出趨勢圖"></canvas>
+      </div>
+    </div>
+  ` : '';
+
+  document.getElementById('tab-analysis').innerHTML = `
+    <div class="row-between">
+      <h2 class="pagetitle">分析</h2>
+      <div class="month-picker">${picker}</div>
+    </div>
+    <div class="toggle-group" style="max-width:220px; margin-bottom:16px;">
+      <button type="button" class="toggle-btn ${!isYear?'active':''}" data-mode="month">月檢視</button>
+      <button type="button" class="toggle-btn ${isYear?'active':''}" data-mode="year">年檢視</button>
+    </div>
+    <div class="cards" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+      <div class="card"><p class="label">${periodLabel}收入</p><p class="value text-pos">NT$ ${fmt(income)}</p></div>
+      <div class="card"><p class="label">${periodLabel}支出</p><p class="value">NT$ ${fmt(expense)}</p></div>
+      <div class="card"><p class="label">${periodLabel}結餘</p><p class="value">NT$ ${fmt(income-expense)}</p></div>
+      <div class="card"><p class="label">儲蓄率</p><p class="value">${income?Math.round((income-expense)/income*100):0}%</p></div>
+    </div>
+    ${trendSection}
+    <div class="panel">
+      <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">分類佔比</p>
+      <div style="position:relative; height:220px; margin-bottom:20px;">
+        <canvas id="catChart" role="img" aria-label="${periodLabel}各分類支出佔比圖"></canvas>
+      </div>
+      ${barsHtml}
+    </div>
+  `;
+
+  document.querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click', ()=>{
+    analysisMode = b.dataset.mode;
+    renderAnalysis();
+  }));
+  document.querySelectorAll('[data-anav]').forEach(b=>b.addEventListener('click', ()=>{
+    const dir = parseInt(b.dataset.anav);
+    if(isYear){ analysisYear += dir; }
+    else{
+      analysisMonth += dir;
+      if(analysisMonth<0){analysisMonth=11; analysisYear--;} if(analysisMonth>11){analysisMonth=0; analysisYear++;}
+    }
+    renderAnalysis();
+  }));
+
+  if(analysisChart) analysisChart.destroy();
+  const ctx = document.getElementById('catChart');
+  if(catEntries.length){
+    analysisChart = new Chart(ctx, {
+      type:'doughnut',
+      data:{ labels:catEntries.map(e=>e[0]), datasets:[{ data:catEntries.map(e=>e[1]), backgroundColor:catEntries.map(e=>catColor(e[0])), borderWidth:2, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--surface') }] },
+      options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } }
+    });
+  }
+
+  if(trendChart){ trendChart.destroy(); trendChart = null; }
+  if(isYear){
+    const monthlyIncome = Array(12).fill(0), monthlyExpense = Array(12).fill(0);
+    state.transactions.forEach(t=>{
+      const d = new Date(t.date);
+      if(d.getFullYear()!==analysisYear) return;
+      if(t.type==='income') monthlyIncome[d.getMonth()] += t.amount;
+      else monthlyExpense[d.getMonth()] += t.amount;
+    });
+    const trendCtx = document.getElementById('trendChart');
+    trendChart = new Chart(trendCtx, {
+      type:'bar',
+      data:{
+        labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+        datasets:[
+          { label:'收入', data:monthlyIncome, backgroundColor:'#0F6E56' },
+          { label:'支出', data:monthlyExpense, backgroundColor:'#D85A30' }
+        ]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary') } } },
+        scales:{
+          y:{ ticks:{ callback:v=>(v/1000)+'k', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid:{ color: getComputedStyle(document.documentElement).getPropertyValue('--border') } },
+          x:{ grid:{ display:false }, ticks:{ color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } }
+        }
+      }
+    });
+  }
+}
+
+/* ---------- accounts tab ---------- */
+function renderAccounts(){
+  const netWorth = state.accounts.reduce((s,a)=>s+accountBalance(a),0);
+  const rows = state.accounts.map(a=>`
+    <div class="list-row">
+      <div style="flex:1;">
+        <p style="margin:0; font-size:14px;">${a.name}</p>
+      </div>
+      <span style="font-size:15px; font-weight:500;">NT$ ${fmt(accountBalance(a))}</span>
+      <div class="txn-actions">
+        <button data-editacc="${a.id}" aria-label="修改帳戶">${ICON.edit}</button>
+        <button data-delacc="${a.id}" aria-label="刪除帳戶">${ICON.trash}</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('tab-accounts').innerHTML = `
+    <div class="row-between">
+      <h2 class="pagetitle">帳戶</h2>
+      <button class="btn btn-primary" id="btnAddAcc">${ICON.plus}新增帳戶</button>
+    </div>
+    <div class="cards" style="grid-template-columns:1fr;">
+      <div class="card"><p class="label">淨資產（不含投資）</p><p class="value">NT$ ${fmt(netWorth)}</p></div>
+    </div>
+    <div class="panel">${rows || '<div class="empty">還沒有帳戶</div>'}</div>
+  `;
+  document.getElementById('btnAddAcc').addEventListener('click', ()=>openAccModal());
+  document.querySelectorAll('[data-editacc]').forEach(b=>b.addEventListener('click', ()=>openAccModal(b.dataset.editacc)));
+  document.querySelectorAll('[data-delacc]').forEach(b=>b.addEventListener('click', ()=>{
+    if(state.transactions.some(t=>t.account===b.dataset.delacc)){
+      if(!confirm('這個帳戶還有交易紀錄，確定要刪除嗎？相關交易不會被刪除。')) return;
+    }
+    state.accounts = state.accounts.filter(a=>a.id!==b.dataset.delacc);
+    renderAccounts();
+  }));
+}
+
+function openAccModal(editId){
+  const editing = editId ? state.accounts.find(a=>a.id===editId) : null;
+  const curBal = editing ? accountBalance(editing) : 0;
+  openModal(`
+    <h3>${editing?'修改帳戶':'新增帳戶'}</h3>
+    <div class="field"><label>帳戶名稱</label><input type="text" id="f-accname" value="${editing?editing.name:''}" placeholder="例如：郵局存簿"></div>
+    <div class="field"><label>目前餘額</label><input type="number" id="f-accbal" value="${editing?curBal:''}" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const name = document.getElementById('f-accname').value.trim();
+    if(!name){ alert('請輸入帳戶名稱'); return; }
+    const newBal = parseFloat(document.getElementById('f-accbal').value)||0;
+    if(editing){
+      editing.name = name;
+      const txnSum = curBal - editing.balance;
+      editing.balance = newBal - txnSum;
+    } else {
+      state.accounts.push({id:uid(), name, balance:newBal});
+    }
+    closeModal(); renderAccounts();
+  });
+}
+
+/* ---------- invest tab ---------- */
+let investTrendChart = null;
+function renderInvest(){
+  const isYear = invMode === 'year';
+
+  const scopedRecords = state.stockRecords.filter(r=>{
+    const d = new Date(r.date);
+    if(d.getFullYear()!==invYear) return false;
+    return isYear ? true : d.getMonth()===invMonth;
+  });
+
+  const scopedFeeRecords = state.feeRecords.filter(r=>{
+    const d = new Date(r.date);
+    if(d.getFullYear()!==invYear) return false;
+    return isYear ? true : d.getMonth()===invMonth;
+  });
+
+  const totalInvested = scopedRecords.reduce((s,r)=>s+r.invested,0);
+  const totalFee = scopedFeeRecords.reduce((s,r)=>s+r.amount,0);
+  const rawProfit = scopedRecords.reduce((s,r)=>s+r.profit,0);
+  const totalProfit = rawProfit; // 總損益不再計入手續費，完全脫鉤
+  const totalPct = totalInvested ? (totalProfit/totalInvested*100) : 0;
+
+  const wins = scopedRecords.filter(r=>r.profit>0);
+  const losses = scopedRecords.filter(r=>r.profit<0);
+  const avgWin = wins.length ? wins.reduce((s,r)=>s+r.profit,0)/wins.length : 0;
+  const avgLoss = losses.length ? Math.abs(losses.reduce((s,r)=>s+r.profit,0))/losses.length : 0;
+  let ratioLabel;
+  if(wins.length===0 && losses.length===0) ratioLabel = '—';
+  else if(losses.length===0) ratioLabel = '∞';
+  else if(wins.length===0) ratioLabel = '0.00';
+  else ratioLabel = (avgWin/avgLoss).toFixed(2);
+
+  const periodLabel = isYear ? '本年' : '本月';
+  const picker = isYear
+    ? `<button data-invnav="-1">${ICON.chevL}</button><span>${invYear} 年</span><button data-invnav="1">${ICON.chevR}</button>`
+    : `<button data-invnav="-1">${ICON.chevL}</button><span>${invYear} 年 ${invMonth+1} 月</span><button data-invnav="1">${ICON.chevR}</button>`;
+
+  let bodyHtml;
+  if(isYear){
+    const monthlyInvested = Array(12).fill(0), monthlyProfit = Array(12).fill(0), monthlyFee = Array(12).fill(0);
+    scopedRecords.forEach(r=>{
+      const m = new Date(r.date).getMonth();
+      monthlyInvested[m] += r.invested;
+      monthlyProfit[m] += r.profit;
+    });
+    scopedFeeRecords.forEach(r=>{
+      const m = new Date(r.date).getMonth();
+      monthlyFee[m] += r.amount;
+    });
+    
+    const monthRows = monthlyInvested.map((inv,i)=>{
+      const fee = monthlyFee[i];
+      const netProfit = monthlyProfit[i]; // 年檢視表格：單純計算股票損益
+      const pct = inv ? (netProfit/inv*100) : 0;
+      if(!inv && !monthlyProfit[i] && !fee) return '';
+      return `<tr>
+        <td>${i+1} 月</td>
+        <td>NT$ ${fmt2(inv)}</td>
+        <td class="${fee > 0 ? 'text-pos' : (fee < 0 ? 'text-neg' : '')}">${fee > 0 ? '+NT$ ' + fmt2(fee) : (fee < 0 ? '-NT$ ' + fmt2(Math.abs(fee)) : '—')}</td>
+        <td class="${netProfit>=0?'text-pos':'text-neg'}">${netProfit>=0?'+':''}NT$ ${fmt2(netProfit)}</td>
+        <td class="${pct>=0?'text-pos':'text-neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</td>
+      </tr>`;
+    }).join('');
+    bodyHtml = `
+      <div class="panel" style="margin-bottom:16px;">
+        <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">每月損益比較</p>
+        <div style="position:relative; height:220px;">
+          <canvas id="investTrendChart" role="img" aria-label="${invYear}年每月投資損益比較圖"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <table>
+          <tr><th>月份</th><th>投入資金</th><th>淨手續費</th><th>淨損益</th><th>報酬率</th></tr>
+          ${monthRows || '<tr><td colspan="5" class="empty">這一年還沒有紀錄</td></tr>'}
+        </table>
+      </div>
+    `;
+  } else {
+    const records = scopedRecords.slice().sort((a,b)=> a.date<b.date ? 1 : (a.date>b.date ? -1 : 0));
+    const rows = records.map(r=>{
+      const pct = r.invested ? (r.profit/r.invested*100) : 0;
+      return `<tr>
+        <td>${fmtDate(r.date)}</td>
+        <td>${r.name} <span style="color:var(--text-muted)">${r.symbol}</span></td>
+        <td>NT$ ${fmt2(r.invested)}</td>
+        <td class="${r.profit>=0?'text-pos':'text-neg'}">${r.profit>=0?'+':''}NT$ ${fmt2(r.profit)}</td>
+        <td class="${pct>=0?'text-pos':'text-neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</td>
+        <td><div class="txn-actions" style="justify-content:flex-end;"><button data-editstock="${r.id}">${ICON.edit}</button><button data-delstock="${r.id}">${ICON.trash}</button></div></td>
+      </tr>`;
+    }).join('');
+
+    const feeRecordsList = scopedFeeRecords.slice().sort((a,b)=> a.date<b.date ? 1 : (a.date>b.date ? -1 : 0));
+    const feeRows = feeRecordsList.map(r=>`
+      <tr>
+        <td>${fmtDate(r.date)}</td>
+        <td style="text-align:left;">${r.note || (r.amount > 0 ? '加錢/退佣' : '扣錢/手續費')}</td>
+        <td class="${r.amount > 0 ? 'text-pos' : 'text-neg'}">${r.amount > 0 ? '+' : '-'}NT$ ${fmt2(Math.abs(r.amount))}</td>
+        <td><div class="txn-actions" style="justify-content:flex-end;"><button data-editfee="${r.id}">${ICON.edit}</button><button data-delfee="${r.id}">${ICON.trash}</button></div></td>
+      </tr>
+    `).join('');
+
+    bodyHtml = `
+      <div class="panel" style="margin-bottom:16px;">
+        <div class="row-between" style="margin-bottom:12px;">
+          <p style="font-size:14px; font-weight:500; margin:0;">股票紀錄</p>
+        </div>
+        <table>
+          <tr><th>日期</th><th>股票</th><th>投入資金</th><th>獲利資金</th><th>損益率</th><th></th></tr>
+          ${rows || '<tr><td colspan="6" class="empty">這個月沒有股票紀錄</td></tr>'}
+        </table>
+      </div>
+      <div class="panel">
+        <div class="row-between" style="margin-bottom:12px;">
+          <p style="font-size:14px; font-weight:500; margin:0;">手續費紀錄 <span style="font-size:12px; color:var(--text-secondary); font-weight:normal; margin-left:6px;">獨立於股票，且不計入總損益</span></p>
+        </div>
+        <table>
+          <tr><th>日期</th><th style="text-align:left;">備註</th><th>金額</th><th></th></tr>
+          ${feeRows || '<tr><td colspan="4" class="empty">這個月沒有手續費紀錄</td></tr>'}
+        </table>
+      </div>
+    `;
+  }
+
+  document.getElementById('tab-invest').innerHTML = `
+    <div class="row-between">
+      <h2 class="pagetitle">投資損益</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn" id="btnAddFee">${ICON.plus}新增手續費</button>
+        <button class="btn btn-primary" id="btnAddStock">${ICON.plus}新增紀錄</button>
+      </div>
+    </div>
+    <div class="row-between" style="margin-bottom:18px;">
+      <div class="month-picker">${picker}</div>
+    </div>
+    <div class="toggle-group" style="max-width:220px; margin-bottom:16px;">
+      <button type="button" class="toggle-btn ${!isYear?'active':''}" data-invmode="month">月檢視</button>
+      <button type="button" class="toggle-btn ${isYear?'active':''}" data-invmode="year">年檢視</button>
+    </div>
+    <div class="cards" style="grid-template-columns:repeat(4,minmax(0,1fr));">
+      <div class="card"><p class="label">${periodLabel}淨手續費</p><p class="value ${totalFee > 0 ? 'text-pos' : (totalFee < 0 ? 'text-neg' : '')}">${totalFee > 0 ? '+' : (totalFee < 0 ? '-' : '')}NT$ ${fmt2(Math.abs(totalFee))}</p></div>
+      <div class="card"><p class="label">${periodLabel}總淨損益</p><p class="value ${totalProfit>=0?'text-pos':'text-neg'}">${totalProfit>=0?'+':''}NT$ ${fmt2(totalProfit)}</p></div>
+      <div class="card"><p class="label">${periodLabel}總報酬率</p><p class="value ${totalPct>=0?'text-pos':'text-neg'}">${totalPct>=0?'+':''}${totalPct.toFixed(2)}%</p></div>
+      <div class="card"><p class="label">賺賠比</p><p class="value">${ratioLabel}</p></div>
+    </div>
+    ${bodyHtml}
+  `;
+
+  document.querySelectorAll('[data-invmode]').forEach(b=>b.addEventListener('click', ()=>{
+    invMode = b.dataset.invmode;
+    renderInvest();
+  }));
+  document.querySelectorAll('[data-invnav]').forEach(b=>b.addEventListener('click', ()=>{
+    const dir = parseInt(b.dataset.invnav);
+    if(isYear){ invYear += dir; }
+    else{
+      invMonth += dir;
+      if(invMonth<0){invMonth=11; invYear--;} if(invMonth>11){invMonth=0; invYear++;}
+    }
+    renderInvest();
+  }));
+  document.getElementById('btnAddStock').addEventListener('click', ()=>openStockModal());
+  document.querySelectorAll('[data-editstock]').forEach(b=>b.addEventListener('click', ()=>openStockModal(b.dataset.editstock)));
+  document.querySelectorAll('[data-delstock]').forEach(b=>b.addEventListener('click', ()=>{
+    state.stockRecords = state.stockRecords.filter(r=>r.id!==b.dataset.delstock);
+    renderInvest();
+  }));
+  document.getElementById('btnAddFee').addEventListener('click', ()=>openFeeModal());
+  document.querySelectorAll('[data-editfee]').forEach(b=>b.addEventListener('click', ()=>openFeeModal(b.dataset.editfee)));
+  document.querySelectorAll('[data-delfee]').forEach(b=>b.addEventListener('click', ()=>{
+    state.feeRecords = state.feeRecords.filter(r=>r.id!==b.dataset.delfee);
+    renderInvest();
+  }));
+
+  if(investTrendChart){ investTrendChart.destroy(); investTrendChart = null; }
+  if(isYear){
+    const monthlyNetProfit = Array(12).fill(0);
+    // 年檢視圖表：單純呈現獲利資金，不再計入手續費
+    scopedRecords.forEach(r=>{ monthlyNetProfit[new Date(r.date).getMonth()] += r.profit; });
+    
+    const barColors = monthlyNetProfit.map(v=> v>=0 ? '#0F6E56' : '#D85A30');
+    const trendCtx = document.getElementById('investTrendChart');
+    investTrendChart = new Chart(trendCtx, {
+      type:'bar',
+      data:{
+        labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+        datasets:[{ label:'淨損益', data:monthlyNetProfit, backgroundColor:barColors }]
+      },
+      options:{
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ display:false } },
+        scales:{
+          y:{ ticks:{ callback:v=>(v/1000)+'k', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid:{ color: getComputedStyle(document.documentElement).getPropertyValue('--border') } },
+          x:{ grid:{ display:false }, ticks:{ color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } }
+        }
+      }
+    });
+  }
+}
+
+function allStockOptionsList(){
+  const seen = new Set();
+  const options = [];
+  TAIWAN_STOCKS.forEach(r=>{
+    if(!seen.has(r.symbol)){ seen.add(r.symbol); options.push(r); }
+  });
+  state.customStocks.forEach(r=>{
+    const key = r.symbol || r.name;
+    if(!seen.has(key)){ seen.add(key); options.push(r); }
+  });
+  return options;
+}
+
+function resolveStock(raw){
+  const v = (raw||'').trim();
+  if(!v) return {name:'', symbol:''};
+  const all = allStockOptionsList();
+  let found = all.find(r=>r.symbol===v);
+  if(found) return {name:found.name, symbol:found.symbol};
+  found = all.find(r=>r.name===v);
+  if(found) return {name:found.name, symbol:found.symbol};
+  found = state.stockRecords.find(r=>r.symbol===v);
+  if(found) return {name:found.name, symbol:found.symbol};
+  found = state.stockRecords.find(r=>r.name===v);
+  if(found) return {name:found.name, symbol:found.symbol};
+  const m = v.match(/^(.*?)[\s\(（]+([A-Za-z0-9.]+)[\)）]?\s*$/);
+  if(m){ return {name:m[1].trim(), symbol:m[2].trim()}; }
+  return {name:v, symbol:''};
+}
+
+function openStockModal(editId){
+  const editing = editId ? state.stockRecords.find(r=>r.id===editId) : null;
+  const isCurrentViewedMonth = invYear===today.getFullYear() && invMonth===today.getMonth();
+  const dval = editing ? editing.date : (isCurrentViewedMonth ? dateStr(today.getFullYear(),today.getMonth(),today.getDate()) : dateStr(invYear,invMonth,1));
+
+  const seen = new Set();
+  const stockOptions = [];
+  allStockOptionsList().forEach(r=>{
+    const key = r.symbol || r.name;
+    if(!seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); }
+  });
+  state.stockRecords.forEach(r=>{
+    const key = r.symbol||r.name;
+    if(r.name && !seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); }
+  });
+  const initialStockVal = editing ? (editing.symbol ? `${editing.name}（${editing.symbol}）` : editing.name) : '';
+
+  openModal(`
+    <h3>${editing?'編輯紀錄':'新增紀錄'}</h3>
+    <div class="field"><label>日期</label><input type="date" id="f-date" value="${dval}"></div>
+    <div class="field">
+      <label>股票（打名稱或代碼都可以）</label>
+      <input type="text" id="f-stock" list="dl-stock" value="${initialStockVal}">
+      <datalist id="dl-stock">${stockOptions.map(o=>`<option value="${o}">`).join('')}</datalist>
+    </div>
+    <div class="field"><label>投入資金</label><input type="number" id="f-invested" value="${editing?editing.invested:''}" placeholder="0"></div>
+    <div class="field"><label>獲利資金（虧損請輸入負數）</label><input type="number" id="f-profit" value="${editing?editing.profit:''}" placeholder="0"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const { name, symbol } = resolveStock(document.getElementById('f-stock').value);
+    const invested = parseFloat(document.getElementById('f-invested').value);
+    const profit = parseFloat(document.getElementById('f-profit').value);
+    const date = document.getElementById('f-date').value;
+    if(!name || !invested || isNaN(profit) || !date){ alert('請完整填寫欄位'); return; }
+    const payload = { name, symbol, invested, profit, date };
+    if(editing){ Object.assign(editing, payload); }
+    else { state.stockRecords.push({id:uid(), ...payload}); }
+    closeModal();
+    const d = new Date(date);
+    invYear = d.getFullYear(); invMonth = d.getMonth();
+    renderInvest();
+  });
+}
+
+function openFeeModal(editId){
+  const editing = editId ? state.feeRecords.find(r=>r.id===editId) : null;
+  const isCurrentViewedMonth = invYear===today.getFullYear() && invMonth===today.getMonth();
+  const dval = editing ? editing.date : (isCurrentViewedMonth ? dateStr(today.getFullYear(),today.getMonth(),today.getDate()) : dateStr(invYear,invMonth,1));
+
+  openModal(`
+    <h3>${editing?'編輯手續費':'新增手續費'}</h3>
+    <div class="field"><label>日期</label><input type="date" id="f-feedate" value="${dval}"></div>
+    <div class="field"><label>金額（正數為加錢/退佣；負數為扣錢/手續費支出）</label><input type="number" id="f-feeamount" value="${editing?editing.amount:''}" placeholder="0"></div>
+    <div class="field"><label>備註（選填）</label><input type="text" id="f-feenote" value="${editing?(editing.note||''):''}" placeholder="例如：開戶手續費或退佣"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const date = document.getElementById('f-feedate').value;
+    const amount = parseFloat(document.getElementById('f-feeamount').value);
+    const note = document.getElementById('f-feenote').value.trim();
+    
+    if(!date || isNaN(amount) || amount === 0){ alert('請輸入有效的日期與不為0的金額'); return; }
+    
+    const payload = { date, amount, note };
+    if(editing){ Object.assign(editing, payload); }
+    else { state.feeRecords.push({id:uid(), ...payload}); }
+    closeModal();
+    const d = new Date(date);
+    invYear = d.getFullYear(); invMonth = d.getMonth();
+    renderInvest();
+  });
+}
+
+/* ---------- settings tab ---------- */
+function catRows(type){
+  const list = state.categories[type];
+  return list.length ? list.map((c,i)=>`
+    <div class="list-row" style="padding:8px 0;">
+      <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:0;">
+        <span style="width:16px; height:16px; border-radius:50%; background:${c.color}; flex-shrink:0;"></span>
+        <span style="font-size:14px;">${c.name}</span>
+      </div>
+      <div class="txn-actions">
+        <button data-catmove="${type}|${i}|-1" aria-label="上移" ${i===0?'disabled style="opacity:.3;"':''}>${ICON.chevUp}</button>
+        <button data-catmove="${type}|${i}|1" aria-label="下移" ${i===list.length-1?'disabled style="opacity:.3;"':''}>${ICON.chevDown}</button>
+        <button data-editcat="${type}|${c.name}" aria-label="編輯分類">${ICON.edit}</button>
+        <button data-delcat="${type}|${c.name}" aria-label="刪除分類">${ICON.trash}</button>
+      </div>
+    </div>
+  `).join('') : '<div class="empty">還沒有分類</div>';
+}
+
+function stockMgmtRows(){
+  if(!state.customStocks.length) return '<div class="empty">還沒有自訂股票</div>';
+  return state.customStocks.map((s,i)=>`
+    <div class="list-row" style="padding:8px 0;">
+      <div style="flex:1; min-width:0;">
+        <span style="font-size:14px;">${s.name}</span>
+        <span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${s.symbol||'（無代碼）'}</span>
+      </div>
+      <div class="txn-actions">
+        <button data-editstockdef="${i}" aria-label="編輯">${ICON.edit}</button>
+        <button data-delstockdef="${i}" aria-label="刪除">${ICON.trash}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSettings(){
+  document.getElementById('tab-settings').innerHTML = `
+    <h2 class="pagetitle" style="margin-bottom:18px;">設定</h2>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <p style="font-size:14px; font-weight:500; margin:0 0 14px;">分類管理</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+        <div>
+          <div class="row-between" style="margin-bottom:6px;">
+            <span style="font-size:13px; color:var(--text-secondary);">支出分類</span>
+            <button class="btn" data-addcat="expense" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
+          </div>
+          ${catRows('expense')}
+        </div>
+        <div>
+          <div class="row-between" style="margin-bottom:6px;">
+            <span style="font-size:13px; color:var(--text-secondary);">收入分類</span>
+            <button class="btn" data-addcat="income" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
+          </div>
+          ${catRows('income')}
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="row-between" style="margin-bottom:14px;">
+        <p style="font-size:14px; font-weight:500; margin:0;">股票清單管理</p>
+        <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">內建清單已涵蓋約 700 檔常見上市股票。這裡新增的股票會出現在「投資損益」的自動完成建議中；找不到的股票也可以直接在該欄位手動輸入名稱或代碼。</p>
+      ${stockMgmtRows()}
+    </div>
+
+    <div class="panel" style="display:flex; flex-direction:column; gap:14px;">
+      <div class="row-between">
+        <div>
+          <p style="margin:0; font-size:14px;">匯出資料</p>
+          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">下載一份 JSON 備份檔，可用來還原資料</p>
+        </div>
+        <button class="btn" id="btnExport">${ICON.download}匯出</button>
+      </div>
+      <div class="row-between">
+        <div>
+          <p style="margin:0; font-size:14px;">匯入資料</p>
+          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">選擇先前匯出的 JSON 檔案來還原</p>
+        </div>
+        <button class="btn" id="btnImport">${ICON.upload}匯入</button>
+      </div>
+      <div class="row-between">
+        <div>
+          <p style="margin:0; font-size:14px;">重設所有資料</p>
+          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">清空帳戶、交易、持股紀錄，分類會恢復預設</p>
+        </div>
+        <button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin:6px 0 0;">資料會自動存在這個瀏覽器裡，關掉再打開也還在。但如果換裝置、清除瀏覽器資料，或改用無痕視窗，資料就不會同步過去，建議偶爾用「匯出」備份一份。</p>
+    </div>
+  `;
+  document.querySelectorAll('[data-catmove]').forEach(b=>b.addEventListener('click', ()=>{
+    const [type, idxStr, dir] = b.dataset.catmove.split('|');
+    const i = parseInt(idxStr), j = i + parseInt(dir);
+    const list = state.categories[type];
+    if(j<0 || j>=list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    renderSettings();
+  }));
+  document.querySelectorAll('[data-addcat]').forEach(b=>b.addEventListener('click', ()=>openCatModal(b.dataset.addcat)));
+  document.querySelectorAll('[data-editcat]').forEach(b=>b.addEventListener('click', ()=>{
+    const [type,name] = b.dataset.editcat.split('|');
+    openCatModal(type, name);
+  }));
+  document.querySelectorAll('[data-delcat]').forEach(b=>b.addEventListener('click', ()=>{
+    const [type,name] = b.dataset.delcat.split('|');
+    const inUse = state.transactions.some(t=>t.category===name && t.type===type);
+    if(inUse && !confirm('這個分類還有交易在使用，確定要刪除嗎？交易紀錄不會被刪除，但顯示顏色會變成預設灰色。')) return;
+    state.categories[type] = state.categories[type].filter(c=>c.name!==name);
+    renderSettings();
+  }));
+  document.getElementById('btnAddStockDef').addEventListener('click', ()=>openStockDefModal());
+  document.querySelectorAll('[data-editstockdef]').forEach(b=>b.addEventListener('click', ()=>openStockDefModal(parseInt(b.dataset.editstockdef))));
+  document.querySelectorAll('[data-delstockdef]').forEach(b=>b.addEventListener('click', ()=>{
+    const idx = parseInt(b.dataset.delstockdef);
+    const s = state.customStocks[idx];
+    const inUse = state.stockRecords.some(r=>(s.symbol && r.symbol===s.symbol) || (!s.symbol && r.name===s.name));
+    if(inUse && !confirm('這檔股票還有投資紀錄在使用，確定要從清單移除嗎？既有紀錄不會被刪除，只是之後不會出現在自動完成建議中。')) return;
+    state.customStocks.splice(idx,1);
+    renderSettings();
+  }));
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    const defaultName = `錢包日誌備份_${dateStr(today.getFullYear(),today.getMonth(),today.getDate())}`;
+    let fileName = prompt('請輸入備份檔案名稱：', defaultName);
+    if (fileName === null) return;
+    if (!fileName.trim()) fileName = defaultName;
+    if (!fileName.endsWith('.json')) fileName += '.json';
+    
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    a.click(); URL.revokeObjectURL(url);
+  });
+  document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    if(confirm('確定要清空所有資料嗎？此動作無法復原。')){
+      state = {
+        accounts:[], transactions:[], stockRecords:[], feeRecords:[],
+        categories:{ expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) },
+        customStocks: []
+      };
+      renderAll();
+    }
+  });
+}
+
+function openStockDefModal(editIdx){
+  const editing = (editIdx!==undefined && editIdx!==null) ? state.customStocks[editIdx] : null;
+  openModal(`
+    <h3>${editing?'編輯股票':'新增股票'}</h3>
+    <div class="field"><label>股票名稱</label><input type="text" id="f-defname" value="${editing?editing.name:''}" placeholder="例如：興櫃某某公司"></div>
+    <div class="field"><label>股票代碼（選填）</label><input type="text" id="f-defsymbol" value="${editing?(editing.symbol||''):''}" placeholder="例如：1234"></div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const name = document.getElementById('f-defname').value.trim();
+    const symbol = document.getElementById('f-defsymbol').value.trim();
+    if(!name){ alert('請輸入股票名稱'); return; }
+    const dupCheck = (s,idx)=> (symbol ? s.symbol===symbol : s.name===name) && idx!==editIdx;
+    if(state.customStocks.some((s,idx)=>dupCheck(s,idx)) || (symbol && TAIWAN_STOCKS.some(s=>s.symbol===symbol))){
+      alert('這檔股票（名稱或代碼）已經存在'); return;
+    }
+    if(editing){ editing.name = name; editing.symbol = symbol; }
+    else { state.customStocks.push({name, symbol}); }
+    closeModal(); renderSettings();
+  });
+}
+
+function openCatModal(type, editName){
+  const editing = editName ? state.categories[type].find(c=>c.name===editName) : null;
+  let chosenColor = editing ? editing.color : CAT_PALETTE[state.categories[type].length % CAT_PALETTE.length];
+  openModal(`
+    <h3>${editing?'編輯分類':'新增'+(type==='expense'?'支出':'收入')+'分類'}</h3>
+    <div class="field"><label>分類名稱</label><input type="text" id="f-catname" value="${editing?editing.name:''}" placeholder="例如：寵物"></div>
+    <div class="field">
+      <label>顏色</label>
+      <div id="colorSwatches" style="display:flex; gap:8px; flex-wrap:wrap;">
+        ${CAT_PALETTE.map(c=>`<button type="button" class="colorswatch" data-color="${c}" style="width:28px;height:28px;border-radius:50%;background:${c};border:2px solid ${chosenColor===c?'var(--text)':'transparent'};padding:0;"></button>`).join('')}
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="btnCancel">取消</button>
+      <button class="btn btn-primary" id="btnSave">儲存</button>
+    </div>
+  `);
+  document.querySelectorAll('.colorswatch').forEach(b=>b.addEventListener('click', ()=>{
+    chosenColor = b.dataset.color;
+    document.querySelectorAll('.colorswatch').forEach(x=>x.style.border='2px solid transparent');
+    b.style.border = '2px solid var(--text)';
+  }));
+  document.getElementById('btnCancel').addEventListener('click', closeModal);
+  document.getElementById('btnSave').addEventListener('click', ()=>{
+    const name = document.getElementById('f-catname').value.trim();
+    if(!name){ alert('請輸入分類名稱'); return; }
+    if(editing){
+      const oldName = editing.name;
+      editing.name = name; editing.color = chosenColor;
+      if(oldName !== name){
+        state.transactions.forEach(t=>{ if(t.type===type && t.category===oldName) t.category = name; });
+      }
+    } else {
+      if(state.categories[type].some(c=>c.name===name)){ alert('這個分類已經存在'); return; }
+      state.categories[type].push({name, color: chosenColor});
+    }
+    closeModal(); renderSettings();
+  });
+}
+
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
+      if(!data.accounts) data.accounts = [];
+      if(!data.transactions) data.transactions = [];
+      if(!data.stockRecords) data.stockRecords = [];
+      if(!data.feeRecords) data.feeRecords = [];
+      if(!data.customStocks) data.customStocks = [];
+      state = data; renderAll();
+      alert('匯入成功');
+    }catch(err){ alert('檔案格式錯誤，無法匯入'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ---------- render all ---------- */
+function renderAll(){
+  saveState();
+  renderCalendar();
+  renderAnalysis();
+  renderAccounts();
+  renderInvest();
+  renderSettings();
+}
+renderAll();
+</script>
+</body>
+</html>
