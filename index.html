@@ -1371,59 +1371,6 @@ function renderSettings(){
   });
 
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
-  
-  document.getElementById('importFile').addEventListener('change', e=>{
-    const file = e.target.files[0];
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = ()=>{
-      try{
-        const data = JSON.parse(reader.result);
-
-        const processImport = () => {
-          if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
-          if(!data.accounts) data.accounts = [];
-          if(!data.transactions) data.transactions = [];
-          if(!data.stockRecords) data.stockRecords = [];
-          if(!data.feeRecords) data.feeRecords = [];
-          if(!data.customStocks) data.customStocks = [];
-          if(!data.credentials) data.credentials = {username:'', password:''};
-          state = data; renderAll();
-          alert('匯入成功');
-        };
-
-        if(data.credentials && (data.credentials.username || data.credentials.password)) {
-          openModal(`
-            <h3>解鎖備份檔案</h3>
-            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">此備份檔受到保護，請輸入原設定的帳號與密碼以進行匯入。</p>
-            <div class="field"><label>帳號</label><input type="text" id="f-verifyuser" placeholder="請輸入帳號"></div>
-            <div class="field"><label>密碼</label><input type="password" id="f-verifypass" placeholder="請輸入密碼"></div>
-            <div class="modal-actions">
-              <button class="btn" id="btnVerifyCancel">取消</button>
-              <button class="btn btn-primary" id="btnVerifySubmit">確認匯入</button>
-            </div>
-          `);
-          document.getElementById('btnVerifyCancel').addEventListener('click', ()=>{
-            closeModal();
-            document.getElementById('importFile').value = '';
-          });
-          document.getElementById('btnVerifySubmit').addEventListener('click', ()=>{
-            const vu = document.getElementById('f-verifyuser').value.trim();
-            const vp = document.getElementById('f-verifypass').value.trim();
-            if(vu === data.credentials.username && vp === data.credentials.password) {
-              closeModal();
-              processImport();
-            } else {
-              alert('帳號或密碼錯誤，請重新輸入！');
-            }
-          });
-        } else {
-          processImport();
-        }
-      }catch(err){ alert('檔案格式錯誤，無法匯入'); e.target.value=''; }
-    };
-    reader.readAsText(file);
-  });
 
   document.getElementById('btnReset').addEventListener('click', ()=>{
     if(confirm('確定要清空所有資料嗎？此動作無法復原。')){
@@ -1437,6 +1384,62 @@ function renderSettings(){
     }
   });
 }
+
+// 匯入檔案的變更事件只需綁定一次；此輸入框在畫面上永遠存在（不會隨 renderSettings 重新產生），
+// 若放在 renderSettings 內綁定，每次重新渲染設定頁（例如展開/收合區塊）都會再疊加一個監聽器，
+// 造成匯入時重複觸發、看起來像「匯入不了」。
+document.getElementById('importFile').addEventListener('change', e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+
+      const processImport = () => {
+        if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
+        if(!data.accounts) data.accounts = [];
+        if(!data.transactions) data.transactions = [];
+        if(!data.stockRecords) data.stockRecords = [];
+        if(!data.feeRecords) data.feeRecords = [];
+        if(!data.customStocks) data.customStocks = [];
+        if(!data.credentials) data.credentials = {username:'', password:''};
+        state = data; renderAll();
+        alert('匯入成功');
+      };
+
+      if(data.credentials && (data.credentials.username || data.credentials.password)) {
+        openModal(`
+          <h3>解鎖備份檔案</h3>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">此備份檔受到保護，請輸入原設定的帳號與密碼以進行匯入。</p>
+          <div class="field"><label>帳號</label><input type="text" id="f-verifyuser" placeholder="請輸入帳號"></div>
+          <div class="field"><label>密碼</label><input type="password" id="f-verifypass" placeholder="請輸入密碼"></div>
+          <div class="modal-actions">
+            <button class="btn" id="btnVerifyCancel">取消</button>
+            <button class="btn btn-primary" id="btnVerifySubmit">確認匯入</button>
+          </div>
+        `);
+        document.getElementById('btnVerifyCancel').addEventListener('click', ()=>{
+          closeModal();
+          document.getElementById('importFile').value = '';
+        });
+        document.getElementById('btnVerifySubmit').addEventListener('click', ()=>{
+          const vu = document.getElementById('f-verifyuser').value.trim();
+          const vp = document.getElementById('f-verifypass').value.trim();
+          if(vu === data.credentials.username && vp === data.credentials.password) {
+            closeModal();
+            processImport();
+          } else {
+            alert('帳號或密碼錯誤，請重新輸入！');
+          }
+        });
+      } else {
+        processImport();
+      }
+    }catch(err){ alert('檔案格式錯誤，無法匯入'); e.target.value=''; }
+  };
+  reader.readAsText(file);
+});
 
 function openStockDefModal(editIdx){
   const editing = (editIdx!==undefined && editIdx!==null) ? state.customStocks[editIdx] : null;
