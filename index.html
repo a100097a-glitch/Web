@@ -413,6 +413,7 @@ let calYear = today.getFullYear(), calMonth = today.getMonth();
 let selectedDay = today.getDate();
 let analysisYear = today.getFullYear(), analysisMonth = today.getMonth(), analysisMode = 'month';
 let invYear = today.getFullYear(), invMonth = today.getMonth(), invMode = 'month';
+let settingsOpen = { categories:false, stocks:false, security:false };
 
 function uid(){ return 'id'+Math.random().toString(36).slice(2,9); }
 function fmt(n){ return Math.round(n).toLocaleString('zh-Hant'); }
@@ -1196,48 +1197,20 @@ function stockMgmtRows(){
 }
 
 function renderSettings(){
+  function collapseHeader(key, title){
+    const open = settingsOpen[key];
+    return `
+      <button type="button" class="row-between" data-toggle="${key}" style="width:100%; background:none; border:none; padding:0; cursor:pointer; text-align:left;">
+        <p style="font-size:14px; font-weight:500; margin:0;">${title}</p>
+        <span style="color:var(--text-secondary); display:flex;">${open?ICON.chevUp:ICON.chevDown}</span>
+      </button>
+    `;
+  }
+
   document.getElementById('tab-settings').innerHTML = `
     <h2 class="pagetitle" style="margin-bottom:18px;">設定</h2>
 
-    <div class="panel" style="margin-bottom:16px;">
-      <p style="font-size:14px; font-weight:500; margin:0 0 14px;">分類管理</p>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px;">
-        <div>
-          <div class="row-between" style="margin-bottom:6px;">
-            <span style="font-size:13px; color:var(--text-secondary);">支出分類</span>
-            <button class="btn" data-addcat="expense" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
-          </div>
-          ${catRows('expense')}
-        </div>
-        <div>
-          <div class="row-between" style="margin-bottom:6px;">
-            <span style="font-size:13px; color:var(--text-secondary);">收入分類</span>
-            <button class="btn" data-addcat="income" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
-          </div>
-          ${catRows('income')}
-        </div>
-      </div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px;">
-      <div class="row-between" style="margin-bottom:14px;">
-        <p style="font-size:14px; font-weight:500; margin:0;">股票清單管理</p>
-        <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
-      </div>
-      ${stockMgmtRows()}
-    </div>
-
-    <div class="panel" style="margin-bottom:16px;">
-      <p style="font-size:14px; font-weight:500; margin:0 0 14px;">備份檔加密設定</p>
-      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">設定後，匯出資料時將加上這組帳密保護。未來匯入該檔案時，需輸入正確帳密才能還原。</p>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:14px;">
-        <div class="field" style="margin:0;"><label>帳號</label><input type="text" id="f-authuser" value="${state.credentials?.username||''}" placeholder="請輸入帳號"></div>
-        <div class="field" style="margin:0;"><label>密碼</label><input type="password" id="f-authpass" value="${state.credentials?.password||''}" placeholder="請輸入密碼"></div>
-      </div>
-      <button class="btn btn-primary" id="btnSaveAuth">儲存帳密設定</button>
-    </div>
-
-    <div class="panel" style="display:flex; flex-direction:column; gap:14px;">
+    <div class="panel" style="display:flex; flex-direction:column; gap:14px; margin-bottom:16px;">
       <div class="row-between">
         <div>
           <p style="margin:0; font-size:14px;">匯出資料</p>
@@ -1259,7 +1232,61 @@ function renderSettings(){
         <button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button>
       </div>
     </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      ${collapseHeader('categories','分類管理')}
+      ${settingsOpen.categories ? `
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px; margin-top:14px;">
+          <div>
+            <div class="row-between" style="margin-bottom:6px;">
+              <span style="font-size:13px; color:var(--text-secondary);">支出分類</span>
+              <button class="btn" data-addcat="expense" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
+            </div>
+            ${catRows('expense')}
+          </div>
+          <div>
+            <div class="row-between" style="margin-bottom:6px;">
+              <span style="font-size:13px; color:var(--text-secondary);">收入分類</span>
+              <button class="btn" data-addcat="income" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
+            </div>
+            ${catRows('income')}
+          </div>
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      ${collapseHeader('stocks','股票清單管理')}
+      ${settingsOpen.stocks ? `
+        <div style="margin-top:14px;">
+          <div class="row-between" style="margin-bottom:14px;">
+            <span style="font-size:13px; color:var(--text-secondary);"></span>
+            <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
+          </div>
+          ${stockMgmtRows()}
+        </div>
+      ` : ''}
+    </div>
+
+    <div class="panel">
+      ${collapseHeader('security','備份檔加密設定')}
+      ${settingsOpen.security ? `
+        <div style="margin-top:14px;">
+          <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">設定後，匯出資料時將加上這組帳密保護。未來匯入該檔案時，需輸入正確帳密才能還原。</p>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:14px;">
+            <div class="field" style="margin:0;"><label>帳號</label><input type="text" id="f-authuser" value="${state.credentials?.username||''}" placeholder="請輸入帳號"></div>
+            <div class="field" style="margin:0;"><label>密碼</label><input type="password" id="f-authpass" value="${state.credentials?.password||''}" placeholder="請輸入密碼"></div>
+          </div>
+          <button class="btn btn-primary" id="btnSaveAuth">儲存帳密設定</button>
+        </div>
+      ` : ''}
+    </div>
   `;
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click', ()=>{
+    const key = b.dataset.toggle;
+    settingsOpen[key] = !settingsOpen[key];
+    renderSettings();
+  }));
   document.querySelectorAll('[data-catmove]').forEach(b=>b.addEventListener('click', ()=>{
     const [type, idxStr, dir] = b.dataset.catmove.split('|');
     const i = parseInt(idxStr), j = i + parseInt(dir);
@@ -1280,7 +1307,7 @@ function renderSettings(){
     state.categories[type] = state.categories[type].filter(c=>c.name!==name);
     renderSettings();
   }));
-  document.getElementById('btnAddStockDef').addEventListener('click', ()=>openStockDefModal());
+  document.getElementById('btnAddStockDef')?.addEventListener('click', ()=>openStockDefModal());
   document.querySelectorAll('[data-editstockdef]').forEach(b=>b.addEventListener('click', ()=>openStockDefModal(parseInt(b.dataset.editstockdef))));
   document.querySelectorAll('[data-delstockdef]').forEach(b=>b.addEventListener('click', ()=>{
     const idx = parseInt(b.dataset.delstockdef);
@@ -1290,7 +1317,7 @@ function renderSettings(){
     state.customStocks.splice(idx,1);
     renderSettings();
   }));
-  document.getElementById('btnSaveAuth').addEventListener('click', ()=>{
+  document.getElementById('btnSaveAuth')?.addEventListener('click', ()=>{
     const username = document.getElementById('f-authuser').value.trim();
     const password = document.getElementById('f-authpass').value.trim();
     state.credentials = { username, password };
@@ -1316,14 +1343,18 @@ function renderSettings(){
           files: [file],
           title: fileName
         });
+        return; // 分享成功，結束
       } catch (e) {
-        // 使用者取消分享，或分享本身失敗，都不再嘗試傳統下載，
-        // 避免同時產生兩份檔案
+        if (e && e.name === 'AbortError') {
+          // 使用者自己取消分享，視為不想匯出，不再另外下載
+          return;
+        }
+        // 裝置回報可分享，但實際分享失敗（常見於 Windows / Android 部分瀏覽器），
+        // 改用下面的傳統下載方式
       }
-      return;
     }
 
-    // 裝置不支援原生分享時，才走傳統檔案下載模式
+    // 裝置不支援原生分享、或分享失敗時，走傳統檔案下載模式
     try {
       const blob = new Blob([jsonStr], {type:'application/json'});
       const url = URL.createObjectURL(blob);
