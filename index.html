@@ -345,7 +345,7 @@ const TAIWAN_STOCKS = [
   {symbol:'3021', name:'鴻名'}, {symbol:'3022', name:'威強電'}, {symbol:'3023', name:'信邦'},
   {symbol:'3024', name:'憶聲'}, {symbol:'3025', name:'星通'}, {symbol:'3026', name:'禾伸堂'},
   {symbol:'3027', name:'盛達'}, {symbol:'3028', name:'增你強'}, {symbol:'3029', name:'零壹'},
-  {symbol:'3030', name:'德律'}, {symbol:'3031', name:'佰鴻'}, {symbol:'3032', name:'偉訓'},
+  {symbol:'3030', name:'德律'}, {symbol:'3031', name:'佰鸿'}, {symbol:'3032', name:'偉訓'},
   {symbol:'3033', name:'威健'}, {symbol:'3034', name:'聯詠'}, {symbol:'3035', name:'智原'},
   {symbol:'3036', name:'文曄'}, {symbol:'3037', name:'欣興'}, {symbol:'3038', name:'全台'},
   {symbol:'3040', name:'遠見'}, {symbol:'3041', name:'揚智'},
@@ -501,7 +501,7 @@ function renderCalendar(){
         <div class="cal-nav">
           <button data-nav="-1">${ICON.chevL}</button>
           <div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;">
-            <span>${calYear} 年 ${calMonth+1} 月</span>
+            <span>${calYear} 年 ${calMonth+1} 月 ▾</span>
             <input type="month" id="calPicker" value="${calYear}-${pad(calMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;">
           </div>
           <button data-nav="1">${ICON.chevR}</button>
@@ -649,8 +649,8 @@ function renderAnalysis(){
   })();
 
   const picker = isYear
-    ? `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年</span>${yearSelectHtml}</div><button data-anav="1">${ICON.chevR}</button>`
-    : `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ${analysisMonth+1} 月</span><input type="month" id="anaMonthPicker" value="${analysisYear}-${pad(analysisMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-anav="1">${ICON.chevR}</button>`;
+    ? `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ▾</span>${yearSelectHtml}</div><button data-anav="1">${ICON.chevR}</button>`
+    : `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ${analysisMonth+1} 月 ▾</span><input type="month" id="anaMonthPicker" value="${analysisYear}-${pad(analysisMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-anav="1">${ICON.chevR}</button>`;
 
   const barsHtml = catEntries.length ? catEntries.map(([cat,amt])=>{
     const pct = expense ? Math.round(amt/expense*100) : 0;
@@ -871,8 +871,8 @@ function renderInvest(){
   })();
 
   const picker = isYear
-    ? `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年</span>${invYearSelectHtml}</div><button data-invnav="1">${ICON.chevR}</button>`
-    : `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ${invMonth+1} 月</span><input type="month" id="invMonthPicker" value="${invYear}-${pad(invMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-invnav="1">${ICON.chevR}</button>`;
+    ? `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ▾</span>${invYearSelectHtml}</div><button data-invnav="1">${ICON.chevR}</button>`
+    : `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ${invMonth+1} 月 ▾</span><input type="month" id="invMonthPicker" value="${invYear}-${pad(invMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-invnav="1">${ICON.chevR}</button>`;
 
   let bodyHtml;
   if(isYear){
