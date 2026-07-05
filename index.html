@@ -383,7 +383,8 @@ let state = {
   transactions: [],
   stockRecords: [],
   feeRecords: [],
-  customStocks: []
+  customStocks: [],
+  credentials: { username: '', password: '' }
 };
 
 const STORAGE_KEY = 'walletJournal_state_v2';
@@ -401,6 +402,7 @@ function saveState(){
         if(!saved.stockRecords) saved.stockRecords = [];
         if(!saved.feeRecords) saved.feeRecords = [];
         if(!saved.customStocks) saved.customStocks = [];
+        if(!saved.credentials) saved.credentials = { username: '', password: '' };
         state = saved;
       }
     }
@@ -491,14 +493,17 @@ function renderCalendar(){
 
   document.getElementById('tab-calendar').innerHTML = `
     <div class="row-between">
-      <h2 class="pagetitle">${calYear} 年 ${calMonth+1} 月</h2>
+      <h2 class="pagetitle">月曆</h2>
       <button class="btn btn-primary" id="btnAddTxn">${ICON.plus}快速記帳</button>
     </div>
     <div class="calendar-wrap panel">
       <div class="cal-col">
         <div class="cal-nav">
           <button data-nav="-1">${ICON.chevL}</button>
-          <span>選擇日期</span>
+          <div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;">
+            <span>${calYear} 年 ${calMonth+1} 月 ▾</span>
+            <input type="month" id="calPicker" value="${calYear}-${pad(calMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;">
+          </div>
           <button data-nav="1">${ICON.chevR}</button>
         </div>
         <div class="weekdays"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
@@ -524,6 +529,16 @@ function renderCalendar(){
     if(selectedDay>dim) selectedDay=dim;
     renderCalendar();
   }));
+  document.getElementById('calPicker')?.addEventListener('change', (e) => {
+    if(!e.target.value) return;
+    const [y, m] = e.target.value.split('-');
+    calYear = parseInt(y, 10);
+    calMonth = parseInt(m, 10) - 1;
+    const dim = new Date(calYear, calMonth+1, 0).getDate();
+    if(selectedDay > dim) selectedDay = dim;
+    renderCalendar();
+  });
+
   document.getElementById('btnAddTxn').addEventListener('click', ()=>openTxnModal());
   document.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click', ()=>openTxnModal(b.dataset.edit)));
   document.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click', ()=>{
@@ -624,6 +639,19 @@ function renderAnalysis(){
   const catEntries = Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
 
   const periodLabel = isYear ? '本年' : '本月';
+  
+  const yearSelectHtml = (() => {
+    let opts = '';
+    for(let y = 2015; y <= 2045; y++) {
+      opts += `<option value="${y}" ${y === analysisYear ? 'selected' : ''}>${y} 年</option>`;
+    }
+    return `<select id="anaYearPicker" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;">${opts}</select>`;
+  })();
+
+  const picker = isYear
+    ? `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ▾</span>${yearSelectHtml}</div><button data-anav="1">${ICON.chevR}</button>`
+    : `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ${analysisMonth+1} 月 ▾</span><input type="month" id="anaMonthPicker" value="${analysisYear}-${pad(analysisMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-anav="1">${ICON.chevR}</button>`;
+
   const barsHtml = catEntries.length ? catEntries.map(([cat,amt])=>{
     const pct = expense ? Math.round(amt/expense*100) : 0;
     return `<div class="bar-row">
@@ -632,10 +660,6 @@ function renderAnalysis(){
       <div class="bar-value">NT$ ${fmt(amt)} (${pct}%)</div>
     </div>`;
   }).join('') : `<div class="empty">${periodLabel}尚無支出紀錄</div>`;
-
-  const picker = isYear
-    ? `<button data-anav="-1">${ICON.chevL}</button><span>${analysisYear} 年</span><button data-anav="1">${ICON.chevR}</button>`
-    : `<button data-anav="-1">${ICON.chevL}</button><span>${analysisYear} 年 ${analysisMonth+1} 月</span><button data-anav="1">${ICON.chevR}</button>`;
 
   const trendSection = isYear ? `
     <div class="panel" style="margin-bottom:16px;">
@@ -684,6 +708,18 @@ function renderAnalysis(){
     }
     renderAnalysis();
   }));
+  document.getElementById('anaYearPicker')?.addEventListener('change', (e) => {
+    if(!e.target.value) return;
+    analysisYear = parseInt(e.target.value, 10);
+    renderAnalysis();
+  });
+  document.getElementById('anaMonthPicker')?.addEventListener('change', (e) => {
+    if(!e.target.value) return;
+    const [y, m] = e.target.value.split('-');
+    analysisYear = parseInt(y, 10);
+    analysisMonth = parseInt(m, 10) - 1;
+    renderAnalysis();
+  });
 
   if(analysisChart) analysisChart.destroy();
   const ctx = document.getElementById('catChart');
@@ -825,9 +861,18 @@ function renderInvest(){
   else ratioLabel = (avgWin/avgLoss).toFixed(2);
 
   const periodLabel = isYear ? '本年' : '本月';
+
+  const invYearSelectHtml = (() => {
+    let opts = '';
+    for(let y = 2015; y <= 2045; y++) {
+      opts += `<option value="${y}" ${y === invYear ? 'selected' : ''}>${y} 年</option>`;
+    }
+    return `<select id="invYearPicker" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;">${opts}</select>`;
+  })();
+
   const picker = isYear
-    ? `<button data-invnav="-1">${ICON.chevL}</button><span>${invYear} 年</span><button data-invnav="1">${ICON.chevR}</button>`
-    : `<button data-invnav="-1">${ICON.chevL}</button><span>${invYear} 年 ${invMonth+1} 月</span><button data-invnav="1">${ICON.chevR}</button>`;
+    ? `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ▾</span>${invYearSelectHtml}</div><button data-invnav="1">${ICON.chevR}</button>`
+    : `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ${invMonth+1} 月 ▾</span><input type="month" id="invMonthPicker" value="${invYear}-${pad(invMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-invnav="1">${ICON.chevR}</button>`;
 
   let bodyHtml;
   if(isYear){
@@ -952,6 +997,18 @@ function renderInvest(){
     }
     renderInvest();
   }));
+  document.getElementById('invYearPicker')?.addEventListener('change', (e) => {
+    if(!e.target.value) return;
+    invYear = parseInt(e.target.value, 10);
+    renderInvest();
+  });
+  document.getElementById('invMonthPicker')?.addEventListener('change', (e) => {
+    if(!e.target.value) return;
+    const [y, m] = e.target.value.split('-');
+    invYear = parseInt(y, 10);
+    invMonth = parseInt(m, 10) - 1;
+    renderInvest();
+  });
   document.getElementById('btnAddStock').addEventListener('click', ()=>openStockModal());
   document.querySelectorAll('[data-editstock]').forEach(b=>b.addEventListener('click', ()=>openStockModal(b.dataset.editstock)));
   document.querySelectorAll('[data-delstock]').forEach(b=>b.addEventListener('click', ()=>{
@@ -1167,8 +1224,17 @@ function renderSettings(){
         <p style="font-size:14px; font-weight:500; margin:0;">股票清單管理</p>
         <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
       </div>
-      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">內建清單已涵蓋約 700 檔常見上市股票。這裡新增的股票會出現在「投資損益」的自動完成建議中；找不到的股票也可以直接在該欄位手手動輸入名稱或代碼。</p>
       ${stockMgmtRows()}
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      <p style="font-size:14px; font-weight:500; margin:0 0 14px;">備份檔加密設定</p>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">設定後，匯出資料時將加上這組帳密保護。未來匯入該檔案時，需輸入正確帳密才能還原。</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:14px;">
+        <div class="field" style="margin:0;"><label>帳號</label><input type="text" id="f-authuser" value="${state.credentials?.username||''}" placeholder="請輸入帳號"></div>
+        <div class="field" style="margin:0;"><label>密碼</label><input type="password" id="f-authpass" value="${state.credentials?.password||''}" placeholder="請輸入密碼"></div>
+      </div>
+      <button class="btn btn-primary" id="btnSaveAuth">儲存帳密設定</button>
     </div>
 
     <div class="panel" style="display:flex; flex-direction:column; gap:14px;">
@@ -1189,7 +1255,6 @@ function renderSettings(){
       <div class="row-between">
         <div>
           <p style="margin:0; font-size:14px;">重設所有資料</p>
-          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">清空帳戶、交易、持股紀錄，分類會恢復預設</p>
         </div>
         <button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button>
       </div>
@@ -1225,6 +1290,13 @@ function renderSettings(){
     state.customStocks.splice(idx,1);
     renderSettings();
   }));
+  document.getElementById('btnSaveAuth').addEventListener('click', ()=>{
+    const username = document.getElementById('f-authuser').value.trim();
+    const password = document.getElementById('f-authpass').value.trim();
+    state.credentials = { username, password };
+    saveState();
+    alert('帳密設定已儲存！未來的備份檔都將套用此加密。');
+  });
   document.getElementById('btnExport').addEventListener('click', ()=>{
     const jsonStr = JSON.stringify(state, null, 2);
     
@@ -1254,12 +1326,67 @@ function renderSettings(){
     }
   });
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
+  
+  document.getElementById('importFile').addEventListener('change', e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+
+        const processImport = () => {
+          if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
+          if(!data.accounts) data.accounts = [];
+          if(!data.transactions) data.transactions = [];
+          if(!data.stockRecords) data.stockRecords = [];
+          if(!data.feeRecords) data.feeRecords = [];
+          if(!data.customStocks) data.customStocks = [];
+          if(!data.credentials) data.credentials = {username:'', password:''};
+          state = data; renderAll();
+          alert('匯入成功');
+        };
+
+        if(data.credentials && (data.credentials.username || data.credentials.password)) {
+          openModal(`
+            <h3>解鎖備份檔案</h3>
+            <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">此備份檔受到保護，請輸入原設定的帳號與密碼以進行匯入。</p>
+            <div class="field"><label>帳號</label><input type="text" id="f-verifyuser" placeholder="請輸入帳號"></div>
+            <div class="field"><label>密碼</label><input type="password" id="f-verifypass" placeholder="請輸入密碼"></div>
+            <div class="modal-actions">
+              <button class="btn" id="btnVerifyCancel">取消</button>
+              <button class="btn btn-primary" id="btnVerifySubmit">確認匯入</button>
+            </div>
+          `);
+          document.getElementById('btnVerifyCancel').addEventListener('click', ()=>{
+            closeModal();
+            document.getElementById('importFile').value = '';
+          });
+          document.getElementById('btnVerifySubmit').addEventListener('click', ()=>{
+            const vu = document.getElementById('f-verifyuser').value.trim();
+            const vp = document.getElementById('f-verifypass').value.trim();
+            if(vu === data.credentials.username && vp === data.credentials.password) {
+              closeModal();
+              processImport();
+            } else {
+              alert('帳號或密碼錯誤，請重新輸入！');
+            }
+          });
+        } else {
+          processImport();
+        }
+      }catch(err){ alert('檔案格式錯誤，無法匯入'); e.target.value=''; }
+    };
+    reader.readAsText(file);
+  });
+
   document.getElementById('btnReset').addEventListener('click', ()=>{
     if(confirm('確定要清空所有資料嗎？此動作無法復原。')){
       state = {
         accounts:[], transactions:[], stockRecords:[], feeRecords:[],
         categories:{ expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) },
-        customStocks: []
+        customStocks: [],
+        credentials: { username: '', password: '' }
       };
       renderAll();
     }
@@ -1331,27 +1458,6 @@ function openCatModal(type, editName){
     closeModal(); renderSettings();
   });
 }
-
-document.getElementById('importFile').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const data = JSON.parse(reader.result);
-      if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
-      if(!data.accounts) data.accounts = [];
-      if(!data.transactions) data.transactions = [];
-      if(!data.stockRecords) data.stockRecords = [];
-      if(!data.feeRecords) data.feeRecords = [];
-      if(!data.customStocks) data.customStocks = [];
-      state = data; renderAll();
-      alert('匯入成功');
-    }catch(err){ alert('檔案格式錯誤，無法匯入'); }
-  };
-  reader.readAsText(file);
-  e.target.value = '';
-});
 
 /* ---------- render all ---------- */
 function renderAll(){
