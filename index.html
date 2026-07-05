@@ -501,7 +501,7 @@ function renderCalendar(){
         <div class="cal-nav">
           <button data-nav="-1">${ICON.chevL}</button>
           <div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;">
-            <span>${calYear} 年 ${calMonth+1} 月 ▾</span>
+            <span>${calYear} 年 ${calMonth+1} 月</span>
             <input type="month" id="calPicker" value="${calYear}-${pad(calMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;">
           </div>
           <button data-nav="1">${ICON.chevR}</button>
@@ -649,8 +649,8 @@ function renderAnalysis(){
   })();
 
   const picker = isYear
-    ? `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ▾</span>${yearSelectHtml}</div><button data-anav="1">${ICON.chevR}</button>`
-    : `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ${analysisMonth+1} 月 ▾</span><input type="month" id="anaMonthPicker" value="${analysisYear}-${pad(analysisMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-anav="1">${ICON.chevR}</button>`;
+    ? `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年</span>${yearSelectHtml}</div><button data-anav="1">${ICON.chevR}</button>`
+    : `<button data-anav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${analysisYear} 年 ${analysisMonth+1} 月</span><input type="month" id="anaMonthPicker" value="${analysisYear}-${pad(analysisMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-anav="1">${ICON.chevR}</button>`;
 
   const barsHtml = catEntries.length ? catEntries.map(([cat,amt])=>{
     const pct = expense ? Math.round(amt/expense*100) : 0;
@@ -871,8 +871,8 @@ function renderInvest(){
   })();
 
   const picker = isYear
-    ? `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ▾</span>${invYearSelectHtml}</div><button data-invnav="1">${ICON.chevR}</button>`
-    : `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ${invMonth+1} 月 ▾</span><input type="month" id="invMonthPicker" value="${invYear}-${pad(invMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-invnav="1">${ICON.chevR}</button>`;
+    ? `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年</span>${invYearSelectHtml}</div><button data-invnav="1">${ICON.chevR}</button>`
+    : `<button data-invnav="-1">${ICON.chevL}</button><div style="position:relative; font-size:15px; font-weight:500; display:inline-flex; align-items:center; justify-content:center;"><span>${invYear} 年 ${invMonth+1} 月</span><input type="month" id="invMonthPicker" value="${invYear}-${pad(invMonth+1)}" style="position:absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer; padding:0; margin:0;"></div><button data-invnav="1">${ICON.chevR}</button>`;
 
   let bodyHtml;
   if(isYear){
@@ -1297,34 +1297,47 @@ function renderSettings(){
     saveState();
     alert('帳密設定已儲存！未來的備份檔都將套用此加密。');
   });
-  document.getElementById('btnExport').addEventListener('click', ()=>{
+
+  // 超級匯出按鈕：結合 Web Share API 與傳統下載
+  document.getElementById('btnExport').addEventListener('click', async ()=>{
+    const defaultName = `錢包日誌備份_${dateStr(today.getFullYear(),today.getMonth(),today.getDate())}.json`;
+    let fileName = prompt('請輸入備份檔案名稱：', defaultName);
+    if (fileName === null) return;
+    if (!fileName.trim()) fileName = defaultName;
+    if (!fileName.endsWith('.json')) fileName += '.json';
+    
     const jsonStr = JSON.stringify(state, null, 2);
     
-    // 建立一個彈出視窗，把 JSON 文字顯示在裡面
-    const overlay = document.createElement('div');
-    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; padding:20px;';
-    
-    const closeBtn = document.createElement('button');
-    closeBtn.innerText = '關閉';
-    closeBtn.className = 'btn btn-primary';
-    closeBtn.style.marginBottom = '10px';
-    closeBtn.onclick = () => document.body.removeChild(overlay);
-    
-    const ta = document.createElement('textarea');
-    ta.value = jsonStr;
-    ta.style.cssText = 'width:100%; height:80%; max-width:600px; font-family:monospace; padding:10px; font-size:12px;';
-    
-    overlay.appendChild(closeBtn);
-    overlay.appendChild(ta);
-    document.body.appendChild(overlay);
+    try {
+      const file = new File([jsonStr], fileName, { type: 'application/json' });
+      // 嘗試喚醒 iOS 原生分享選單，可直接點「儲存到檔案」
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: fileName
+        });
+        return; // 原生分享成功就結束
+      }
+    } catch (e) {
+      // 忽略分享被取消或失敗的錯誤，繼續往下嘗試
+    }
 
-    // 嘗試自動幫你複製到剪貼簿
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(jsonStr).then(() => alert('已將備份資料複製到剪貼簿！\\n請回 Koder 開一個新檔案並貼上。')).catch(e=>{});
-    } else {
-      alert('請手動全選下方框框內的文字並複製。');
+    // 傳統檔案下載模式
+    try {
+      const blob = new Blob([jsonStr], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; 
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click(); 
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('無法直接匯出！\\n\\n因為 Koder 預覽模式限制了檔案下載，請點擊上方的「指南針圖示」切換到 Safari 瀏覽器即可順利匯出。');
     }
   });
+
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
   
   document.getElementById('importFile').addEventListener('change', e=>{
