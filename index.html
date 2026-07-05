@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="錢包日誌">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC10lEQVR4nO3d0U3bABRA0VD1H6YrW8AsHaPbdYR+REJV4aoiUL/X5JwFYj9dP1tWCHf3T99O8JYv0wfAXuIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgfZ0+gPTz+4/pQzjOw/Pj9CG84W7b/5W9qSZeW1XJrtvKjZdxWjaBLZtj1VA22LBCVmwOZby2YSbzcWyYwk7jk5mPg7WG4xi/OJabnc/kA+lfz3zDQ9kB1s5h6UuwG8ni7HyyC5foxmeOmyrjxcKzHotj4YWy1tSs1m2OhRfQYbad+7o42EMcJHGQxEESB0kcpKVvSP8v1/rORhwfcq1ZnLmtXO66yziJ42JXX8ZJHJc5voyRFsVBEse7Td1Qjv9ccZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcbzb1O/vHP+54iCJ4xLHX8Qj60ocF9r2427/gjgud/V9iONDHp4frzgRv8/xCT6xj1V/vG9zkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHKR1caz6tsvBtp37WBxX/O26Tzc1q3Wb47TvAjrGwrNe+h3S86RuZLsszOLs7v7p2+DHr53LHoNXyPBt5UZ2w8Vm57PxmYMl5uOwPMr4ZObjOC2YwkIbZjL8QPoHz6enHVmcrdgcL/bMZcqqCezaHL+7qS2yqokXe+Ng3K7bCquIgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0i+ICm4FWqV6SgAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC10lEQVR4nO3d0U3bABRA0VD1H6YrW8AsHaPbdYR+REJV4aoiUL/X5JwFYj9dP1tWCHf3T99O8JYv0wfAXuIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgfZ0+gPTz+4/pQzjOw/Pj9CG84W7b/5W9qSZeW1XJrtvKjZdxWjaBLZtj1VA22LBCVmwOZby2YSbzcWyYwk7jk5mPg7WG4xi/OJabnc/kA+lfz3zDQ9kB1s5h6UuwG8ni7HyyC5foxmeOmyrjxcKzHotj4YWy1tSs1m2OhRfQYbad+7o42EMcJHGQxEESB0kcpKVvSP8v1/rORhwfcq1ZnLmtXO66yziJ42JXX8ZJHJc5voyRFsVBEse7Td1Qjv9ccZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcbzb1O/vHP+54iCJ4xLHX8Qj60ocF9r2427/gjgud/V9iONDHp4frzgRv8/xCT6xj1V/vG9zkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHKR1caz6tsvBtp37WBxX/O26Tzc1q3Wb47TvAjrGwrNe+h3S86RuZLsszOLs7v7p2+DHr53LHoNXyPBt5UZ2w8Vm57PxmYMl5uOwPMr4ZObjOC2YwkIbZjL8QPoHz6enHVmcrdgcL/bMZcqqCezaHL+7qS2yqokXe+Ng3K7bCquIgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0i+ICm4FWqV6SgAAAABJRU5ErkJggg==">
 <title>錢包日誌</title>
 <style>
 :root{
@@ -1144,7 +1144,7 @@ function renderSettings(){
 
     <div class="panel" style="margin-bottom:16px;">
       <p style="font-size:14px; font-weight:500; margin:0 0 14px;">分類管理</p>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px;">
         <div>
           <div class="row-between" style="margin-bottom:6px;">
             <span style="font-size:13px; color:var(--text-secondary);">支出分類</span>
@@ -1167,7 +1167,7 @@ function renderSettings(){
         <p style="font-size:14px; font-weight:500; margin:0;">股票清單管理</p>
         <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
       </div>
-      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">內建清單已涵蓋約 700 檔常見上市股票。這裡新增的股票會出現在「投資損益」的自動完成建議中；找不到的股票也可以直接在該欄位手動輸入名稱或代碼。</p>
+      <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">內建清單已涵蓋約 700 檔常見上市股票。這裡新增的股票會出現在「投資損益」的自動完成建議中；找不到的股票也可以直接在該欄位手手動輸入名稱或代碼。</p>
       ${stockMgmtRows()}
     </div>
 
@@ -1193,7 +1193,6 @@ function renderSettings(){
         </div>
         <button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button>
       </div>
-      <p style="font-size:12px; color:var(--text-muted); margin:6px 0 0;">資料會自動存在這個瀏覽器裡，關掉再打開也還在。但如果換裝置、清除瀏覽器資料，或改用無痕視窗，資料就不會同步過去，建議偶爾用「匯出」備份一份。</p>
     </div>
   `;
   document.querySelectorAll('[data-catmove]').forEach(b=>b.addEventListener('click', ()=>{
@@ -1227,17 +1226,32 @@ function renderSettings(){
     renderSettings();
   }));
   document.getElementById('btnExport').addEventListener('click', ()=>{
-    const defaultName = `錢包日誌備份_${dateStr(today.getFullYear(),today.getMonth(),today.getDate())}`;
-    let fileName = prompt('請輸入備份檔案名稱：', defaultName);
-    if (fileName === null) return;
-    if (!fileName.trim()) fileName = defaultName;
-    if (!fileName.endsWith('.json')) fileName += '.json';
+    const jsonStr = JSON.stringify(state, null, 2);
     
-    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fileName;
-    a.click(); URL.revokeObjectURL(url);
+    // 建立一個彈出視窗，把 JSON 文字顯示在裡面
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; display:flex; flex-direction:column; align-items:center; padding:20px;';
+    
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = '關閉';
+    closeBtn.className = 'btn btn-primary';
+    closeBtn.style.marginBottom = '10px';
+    closeBtn.onclick = () => document.body.removeChild(overlay);
+    
+    const ta = document.createElement('textarea');
+    ta.value = jsonStr;
+    ta.style.cssText = 'width:100%; height:80%; max-width:600px; font-family:monospace; padding:10px; font-size:12px;';
+    
+    overlay.appendChild(closeBtn);
+    overlay.appendChild(ta);
+    document.body.appendChild(overlay);
+
+    // 嘗試自動幫你複製到剪貼簿
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(jsonStr).then(() => alert('已將備份資料複製到剪貼簿！\\n請回 Koder 開一個新檔案並貼上。')).catch(e=>{});
+    } else {
+      alert('請手動全選下方框框內的文字並複製。');
+    }
   });
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
   document.getElementById('btnReset').addEventListener('click', ()=>{
