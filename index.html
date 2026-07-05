@@ -559,9 +559,10 @@ function openTxnModal(editId, draft){
       || '<option value="">（尚無分類，請先新增）</option>';
   }
   function accOptions(){
-    if(!state.accounts.length) return '<option value="">（請先至帳戶頁面新增帳戶）</option>';
     const selected = editing ? editing.account : (draft ? draft.account : null);
-    return state.accounts.map(a=>`<option value="${a.id}" ${selected===a.id?'selected':''}>${a.name}（NT$ ${fmt(accountBalance(a))}）</option>`).join('');
+    const noneOpt = `<option value="" ${!selected?'selected':''}>不指定帳戶</option>`;
+    if(!state.accounts.length) return noneOpt;
+    return noneOpt + state.accounts.map(a=>`<option value="${a.id}" ${selected===a.id?'selected':''}>${a.name}（NT$ ${fmt(accountBalance(a))}）</option>`).join('');
   }
 
   openModal(`
@@ -604,7 +605,6 @@ function openTxnModal(editId, draft){
     const category = document.getElementById('f-cat').value;
     if(!category){ alert('請先新增至少一個分類'); return; }
     const account = document.getElementById('f-acc').value;
-    if(!account){ alert('請先新增至少一個帳戶'); return; }
     const payload = {
       type, amount, category, account,
       date: document.getElementById('f-date').value,
@@ -1307,22 +1307,23 @@ function renderSettings(){
     if (!fileName.endsWith('.json')) fileName += '.json';
     
     const jsonStr = JSON.stringify(state, null, 2);
-    
-    try {
-      const file = new File([jsonStr], fileName, { type: 'application/json' });
-      // 嘗試喚醒 iOS 原生分享選單，可直接點「儲存到檔案」
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+    // 嘗試喚醒 iOS/iPad 原生分享選單，可直接點「儲存到檔案」
+    const file = new File([jsonStr], fileName, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
         await navigator.share({
           files: [file],
           title: fileName
         });
-        return; // 原生分享成功就結束
+      } catch (e) {
+        // 使用者取消分享，或分享本身失敗，都不再嘗試傳統下載，
+        // 避免同時產生兩份檔案
       }
-    } catch (e) {
-      // 忽略分享被取消或失敗的錯誤，繼續往下嘗試
+      return;
     }
 
-    // 傳統檔案下載模式
+    // 裝置不支援原生分享時，才走傳統檔案下載模式
     try {
       const blob = new Blob([jsonStr], {type:'application/json'});
       const url = URL.createObjectURL(blob);
