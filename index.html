@@ -1530,55 +1530,67 @@ function renderAll(){
   renderSettings();
 }
 /* ---------- 開機密碼鎖檢查 ---------- */
-function checkAppLock() {
-  // 如果設定中有存密碼，就啟動鎖定畫面
-  if (state.credentials && state.credentials.password) {
+function initApp() {
+  // 如果設定中有存帳號或密碼，就啟動鎖定畫面
+  if (state.credentials && (state.credentials.username || state.credentials.password)) {
     // 1. 先把主畫面隱藏起來
     document.querySelector('.app').style.display = 'none';
 
-    // 2. 建立一個充滿整個畫面的解鎖介面 (沿用你原本的顏色變數)
+    // 2. 建立一個充滿整個畫面的解鎖介面
     const lockScreen = document.createElement('div');
     lockScreen.id = 'app-lock-screen';
-    lockScreen.style.cssText = 'position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+    lockScreen.style.cssText = 'position:fixed; inset:0; background:var(--bg); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;';
     
     lockScreen.innerHTML = `
-      <div class="panel" style="width:100%; max-width:320px; text-align:center;">
-        <div style="margin-bottom:20px; color:var(--accent);">${ICON.wallet}</div>
-        <h2 style="margin:0 0 16px; font-size:18px;">請解鎖錢包日誌</h2>
-        <div class="field" style="text-align:left;">
-          <input type="password" id="unlockPass" placeholder="請輸入密碼" style="width:100%; text-align:center; letter-spacing: 2px;">
+      <div class="panel" style="width:100%; max-width:320px; padding:32px 24px; box-shadow:0 10px 30px rgba(0,0,0,0.1);">
+        <div style="text-align:center; margin-bottom:16px; color:var(--accent); display:flex; justify-content:center; transform:scale(1.5);">${ICON.wallet}</div>
+        <h2 style="margin:0 0 20px; text-align:center; font-size:18px;">請解鎖錢包日誌</h2>
+        <div class="field">
+          <label style="text-align:left;">帳號</label>
+          <input type="text" id="ls-user" placeholder="請輸入帳號" style="text-align:center; letter-spacing:1px; margin-bottom:12px;">
         </div>
-        <button class="btn btn-primary" id="btnUnlock" style="width:100%; justify-content:center;">解鎖</button>
+        <div class="field">
+          <label style="text-align:left;">密碼</label>
+          <input type="password" id="ls-pass" placeholder="請輸入密碼" style="text-align:center; letter-spacing:2px;">
+        </div>
+        <button class="btn btn-primary" id="btnUnlock" style="width:100%; justify-content:center; margin-top:16px; padding:12px; font-size:15px;">解鎖</button>
       </div>
     `;
     document.body.appendChild(lockScreen);
 
     // 3. 綁定解鎖按鈕的動作
-    document.getElementById('btnUnlock').addEventListener('click', () => {
-      const inputPass = document.getElementById('unlockPass').value;
-      if (inputPass === state.credentials.password) {
+    const checkUnlock = () => {
+      const u = document.getElementById('ls-user').value.trim();
+      const p = document.getElementById('ls-pass').value.trim();
+      
+      if (u === state.credentials.username && p === state.credentials.password) {
         // 密碼正確：移除鎖定畫面，顯示主畫面，並渲染資料
-        document.body.removeChild(lockScreen);
+        lockScreen.remove();
         document.querySelector('.app').style.display = 'flex';
         renderAll();
       } else {
-        alert('密碼錯誤！');
+        alert('帳號或密碼錯誤！');
       }
-    });
+    };
 
-    // 支援按下 Enter 鍵解鎖
-    document.getElementById('unlockPass').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') document.getElementById('btnUnlock').click();
+    document.getElementById('btnUnlock').addEventListener('click', checkUnlock);
+    
+    // 支援按下 Enter 鍵解鎖與跳轉
+    document.getElementById('ls-user').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('ls-pass').focus();
+    });
+    document.getElementById('ls-pass').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') checkUnlock();
     });
 
   } else {
-    // 如果使用者還沒在「設定」裡面設定過密碼，就直接進入畫面
+    // 如果使用者還沒在「設定」裡面設定過帳密，就直接進入畫面
     renderAll();
   }
 }
 
 // 執行開機檢查
-checkAppLock();
+initApp();
 </script>
 </body>
 </html>
