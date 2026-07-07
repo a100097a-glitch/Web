@@ -1582,11 +1582,53 @@ function initApp() {
     document.getElementById('ls-pass').addEventListener('keypress', (e) => {
       if (e.key === 'Enter') checkUnlock();
     });
+    } else {
+  // 【情境 B：尚未設定】強迫設定初始帳號與密碼
+  lockScreen.innerHTML = `
+    <div class="panel" style="width:100%; max-width:320px; padding:32px 24px; box-shadow:0 10px 30px rgba(0,0,0,0.1); border-radius:12px; background:var(--surface);">
+      <div style="text-align:center; margin-bottom:16px; color:var(--accent); display:flex; justify-content:center;">
+        ${ICON.settings}
+      </div>
+      <h2 style="margin:0 0 8px; text-align:center; font-size:18px;">初始化安全設定</h2>
+      <p style="font-size:12px; color:var(--text-secondary); text-align:center; margin:0 0 16px;">請為您的日誌設定一組專屬帳號與密碼：</p>
+      <div class="field">
+        <label style="text-align:left; display:block; margin-bottom:6px;">設定帳號</label>
+        <input type="text" id="initUser" placeholder="請輸入新帳號" style="width:100%; text-align:center;">
+      </div>
+      <div class="field">
+        <label style="text-align:left; display:block; margin-bottom:6px;">設定密碼</label>
+        <input type="password" id="initPass" placeholder="請輸入新密碼" style="width:100%; text-align:center; letter-spacing:2px;">
+      </div>
+      <button class="btn btn-primary" id="btnInitAuth" style="width:100%; justify-content:center; margin-top:16px; padding:10px;">儲存並進入系統</button>
+    </div>
+  `;
+  document.body.appendChild(lockScreen);
 
-  } else {
-    // 如果使用者還沒在「設定」裡面設定過帳密，就直接進入畫面
+  const doInit = () => {
+    const newUser = document.getElementById('initUser').value.trim();
+    const newPass = document.getElementById('initPass').value.trim();
+    
+    if (!newUser || !newPass) { 
+      alert('帳號與密碼都不能為空！'); 
+      return; 
+    }
+    
+    // 將新帳號密碼寫入系統設定並儲存
+    if(!state.credentials) state.credentials = { username: '', password: '' };
+    state.credentials.username = newUser;
+    state.credentials.password = newPass; 
+    saveState(); 
+    
+    // 移除鎖定畫面，進入主系統
+    lockScreen.remove();
+    document.querySelector('.app').style.display = 'flex'; 
     renderAll();
-  }
+  };
+
+  document.getElementById('btnInitAuth').addEventListener('click', doInit);
+  document.getElementById('initPass').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') doInit();
+  });
 }
 
 // 執行開機檢查
