@@ -1325,6 +1325,7 @@ function renderSettings(){
     alert('帳密設定已儲存！未來的備份檔都將套用此加密。');
   });
 
+  // 超級匯出按鈕：結合 Web Share API 與傳統下載
   document.getElementById('btnExport').addEventListener('click', async ()=>{
     const defaultName = `錢包日誌備份_${dateStr(today.getFullYear(),today.getMonth(),today.getDate())}.json`;
     let fileName = prompt('請輸入備份檔案名稱：', defaultName);
@@ -1333,33 +1334,38 @@ function renderSettings(){
     if (!fileName.endsWith('.json')) fileName += '.json';
     
     const jsonStr = JSON.stringify(state, null, 2);
-    const blob = new Blob([jsonStr], {type: 'application/json;charset=utf-8'});
-    const file = new File([blob], fileName, { type: 'application/json' });
 
+    // 嘗試喚醒 iOS/iPad 原生分享選單，可直接點「儲存到檔案」
+    const file = new File([jsonStr], fileName, { type: 'application/json' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({
           files: [file],
-          title: '錢包日誌備份'
         });
-        return;
+        return; // 分享成功，結束
       } catch (e) {
-        if (e && e.name === 'AbortError') return;
+        if (e && e.name === 'AbortError') {
+          // 使用者自己取消分享，視為不想匯出，不再另外下載
+          return;
+        }
+        // 裝置回報可分享，但實際分享失敗（常見於 Windows / Android 部分瀏覽器），
+        // 改用下面的傳統下載方式
       }
     }
 
+    // 裝置不支援原生分享、或分享失敗時，走傳統檔案下載模式
     try {
+      const blob = new Blob([jsonStr], {type:'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; 
       a.download = fileName;
-      a.style.display = 'none';
       document.body.appendChild(a);
       a.click(); 
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      alert('匯出失敗，請確保您是在瀏覽器環境中執行，而非程式編輯器的預覽模式。');
+      alert('無法直接匯出！\\n\\n因為 Koder 預覽模式限制了檔案下載，請點擊上方的「指南針圖示」切換到 Safari 瀏覽器即可順利匯出。');
     }
   });
 
