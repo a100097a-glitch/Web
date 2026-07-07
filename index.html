@@ -1529,7 +1529,56 @@ function renderAll(){
   renderInvest();
   renderSettings();
 }
-renderAll();
+/* ---------- 開機密碼鎖檢查 ---------- */
+function checkAppLock() {
+  // 如果設定中有存密碼，就啟動鎖定畫面
+  if (state.credentials && state.credentials.password) {
+    // 1. 先把主畫面隱藏起來
+    document.querySelector('.app').style.display = 'none';
+
+    // 2. 建立一個充滿整個畫面的解鎖介面 (沿用你原本的顏色變數)
+    const lockScreen = document.createElement('div');
+    lockScreen.id = 'app-lock-screen';
+    lockScreen.style.cssText = 'position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;padding:20px;';
+    
+    lockScreen.innerHTML = `
+      <div class="panel" style="width:100%; max-width:320px; text-align:center;">
+        <div style="margin-bottom:20px; color:var(--accent);">${ICON.wallet}</div>
+        <h2 style="margin:0 0 16px; font-size:18px;">請解鎖錢包日誌</h2>
+        <div class="field" style="text-align:left;">
+          <input type="password" id="unlockPass" placeholder="請輸入密碼" style="width:100%; text-align:center; letter-spacing: 2px;">
+        </div>
+        <button class="btn btn-primary" id="btnUnlock" style="width:100%; justify-content:center;">解鎖</button>
+      </div>
+    `;
+    document.body.appendChild(lockScreen);
+
+    // 3. 綁定解鎖按鈕的動作
+    document.getElementById('btnUnlock').addEventListener('click', () => {
+      const inputPass = document.getElementById('unlockPass').value;
+      if (inputPass === state.credentials.password) {
+        // 密碼正確：移除鎖定畫面，顯示主畫面，並渲染資料
+        document.body.removeChild(lockScreen);
+        document.querySelector('.app').style.display = 'flex';
+        renderAll();
+      } else {
+        alert('密碼錯誤！');
+      }
+    });
+
+    // 支援按下 Enter 鍵解鎖
+    document.getElementById('unlockPass').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') document.getElementById('btnUnlock').click();
+    });
+
+  } else {
+    // 如果使用者還沒在「設定」裡面設定過密碼，就直接進入畫面
+    renderAll();
+  }
+}
+
+// 執行開機檢查
+checkAppLock();
 </script>
 </body>
 </html>
