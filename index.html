@@ -114,6 +114,20 @@ td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
   .cal-col{width:100%;}
   .cards{grid-template-columns:1fr 1fr !important;}
 }
+/* ---------- 修正 iOS Safari 日期輸入框的預設樣式 ---------- */
+ input[type="date"], 
+ input[type="month"] {
+   text-align: left;
+   -webkit-appearance: none;
+   appearance: none;
+   background-color: var(--surface);
+   min-height: 35px;
+}
+
+ input[type="date"]::-webkit-date-and-time-value, 
+ input[type="month"]::-webkit-date-and-time-value {
+   text-align: left;
+}
 </style>
 </head>
 <body>
