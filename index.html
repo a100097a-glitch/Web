@@ -159,21 +159,12 @@ td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-// 強制檢查更新機制
-window.addEventListener('load', () => {
-    // 檢查是否有更新的 flag，或是直接透過 fetch 檢查伺服器最新的 index.html 時間戳
-    fetch(window.location.href + '?cacheBust=' + new Date().getTime())
-        .then(response => response.text())
-        .then(html => {
-            // 這是一個極端的做法：如果抓回來的內容跟目前的不一樣，直接刷新頁面
-            // 這通常是為了對付非常頑固的 CDN 快取
-            const currentContent = document.documentElement.outerHTML;
-            if (html.length !== currentContent.length) {
-                console.log("偵測到遠端更新，正在強制刷新...");
-                window.location.reload(true);
-            }
-        });
-});
+const CURRENT_VERSION = "v1"; 
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUrlVersion = urlParams.get('v');
+    if (currentUrlVersion !== CURRENT_VERSION) {
+        window.location.replace(window.location.pathname + "?v=" + CURRENT_VERSION);
+    }
 /* ---------- icons ---------- */
 const ICON = {
   calendar:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
