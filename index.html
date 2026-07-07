@@ -159,20 +159,12 @@ td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
-// 1. 定義你目前的網站版本號 (每次更新網站，就把這個數字改掉，例如改成 "v2", "v3")
 const CURRENT_VERSION = "v1"; 
-
-// 2. 抓取目前網址列的參數
-const urlParams = new URLSearchParams(window.location.search);
-const currentUrlVersion = urlParams.get('v');
-
-// 3. 判斷：如果網址上的版本號，跟最新的版本號不一樣 (或者根本沒有版本號)
-if (currentUrlVersion !== CURRENT_VERSION) {
-    console.log("偵測到舊版或無版本號，強制跳轉至最新版...");
-    
-    // 強制瀏覽器跳轉到加上最新版本號的網址
-    window.location.replace(window.location.pathname + "?v=" + CURRENT_VERSION);
-}
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentUrlVersion = urlParams.get('v');
+    if (currentUrlVersion !== CURRENT_VERSION) {
+        window.location.replace(window.location.pathname + "?v=" + CURRENT_VERSION);
+    }
 /* ---------- icons ---------- */
 const ICON = {
   calendar:'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>',
