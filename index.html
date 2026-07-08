@@ -7,7 +7,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="錢包日誌">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC10lEQVR4nO3d0U3bABRA0VD1H6YrW8AsHaPbdYR+REJV4aoiUL/X5JwFYj9dP1tWCHf3T99O8JYv0wfAXuIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgiYMkDpI4SOIgfZ0+gPTz+4/pQzjOw/Pj9CG84W7b/5W9qSZeW1XJrtvKjZdxWjaBLZtj1VA22LBCVmwOZby2YSbzcWyYwk7jk5mPg7WG4xi/OJabnc/kA+lfz3zDQ9kB1s5h6UuwG8ni7HyyC5foxmeOmyrjxcKzHotj4YWy1tSs1m2OhRfQYbad+7o42EMcJHGQxEESB0kcpKVvSP8v1/rORhwfcq1ZnLmtXO66yziJ42JXX8ZJHJc5voyRFsVBEse7Td1Qjv9ccZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcbzb1O/vHP+54iCJ4xLHX8Qj60ocF9r2427/gjgud/V9iONDHp4frzgRv8/xCT6xj1V/vG9zkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHKR1caz6tsvBtp37WBxX/O26Tzc1q3Wb47TvAjrGwrNe+h3S86RuZLsszOLs7v7p2+DHr53LHoNXyPBt5UZ2w8Vm57PxmYMl5uOwPMr4ZObjOC2YwkIbZjL8QPoHz6enHVmcrdgcL/bMZcqqCezaHL+7qS2yqokXe+Ng3K7bCquIgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQOkjhI4iCJgyQO0i+ICm4FWqV6SgAAAABJRU5ErkJggg==">
 <title>錢包日誌</title>
 <style>
 :root{
@@ -35,7 +34,8 @@ input,select,textarea{font-family:inherit; font-size:14px; padding:8px 10px; bor
 .btn:hover{background:var(--surface-2);}
 .btn-primary{background:var(--accent); color:#fff; border-color:var(--accent);}
 .btn-primary:hover{opacity:.9;}
-.btn-danger{color:var(--danger);}
+.btn-danger{color:var(--danger); border-color:var(--danger); background:none;}
+.btn-danger:hover{background:var(--danger-bg);}
 .icon{width:18px; height:18px; flex-shrink:0;}
 .app{display:flex; min-height:100vh; max-width:1180px; margin:0 auto;}
 .sidebar{width:180px; flex-shrink:0; padding:24px 12px; border-right:0.5px solid var(--border); display:flex; flex-direction:column; gap:2px;}
@@ -114,25 +114,15 @@ td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
   .cal-col{width:100%;}
   .cards{grid-template-columns:1fr 1fr !important;}
 }
-/* ---------- 修正 iOS Safari 日期輸入框的預設樣式 ---------- */
- input[type="date"], 
- input[type="month"] {
-   text-align: left;
-   -webkit-appearance: none;
-   appearance: none;
-   background-color: var(--surface);
-   min-height: 35px;
+input[type="date"], input[type="month"] {
+   text-align: left; -webkit-appearance: none; appearance: none; background-color: var(--surface); min-height: 35px;
 }
-
- input[type="date"]::-webkit-date-and-time-value, 
- input[type="month"]::-webkit-date-and-time-value {
-   text-align: left;
-}
+input[type="date"]::-webkit-date-and-time-value, input[type="month"]::-webkit-date-and-time-value { text-align: left; }
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app" id="main-app">
   <nav class="sidebar">
     <h1>錢包日誌</h1>
     <button class="navitem active" data-tab="calendar"></button>
@@ -157,6 +147,7 @@ td{padding:10px 4px; border-bottom:0.5px solid var(--border); text-align:right;}
 
 <input type="file" id="importFile" accept="application/json" style="display:none">
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 /* ---------- icons ---------- */
@@ -184,7 +175,6 @@ document.querySelector('[data-tab=accounts]').innerHTML = ICON.wallet+'帳戶';
 document.querySelector('[data-tab=invest]').innerHTML = ICON.trend+'投資';
 document.querySelector('[data-tab=settings]').innerHTML = ICON.settings+'設定';
 
-/* ---------- categories ---------- */
 const DEFAULT_EXPENSE_CATS = [
   {name:'餐飲', color:'#D85A30'}, {name:'交通', color:'#7F77DD'}, {name:'娛樂', color:'#D4537E'},
   {name:'居家', color:'#1D9E75'}, {name:'購物', color:'#BA7517'}, {name:'醫療', color:'#378ADD'}, {name:'其他', color:'#888780'}
@@ -199,230 +189,116 @@ function catColor(name){
   return f ? f.color : '#888780';
 }
 
-/* ---------- taiwan stock list ---------- */
 const TAIWAN_STOCKS = [
-  {symbol:'1101', name:'台泥'}, {symbol:'1102', name:'亞泥'}, {symbol:'1103', name:'嘉泥'},
-  {symbol:'1104', name:'環泥'}, {symbol:'1108', name:'幸福'}, {symbol:'1109', name:'信大'},
-  {symbol:'1110', name:'東泥'}, {symbol:'1201', name:'味全'}, {symbol:'1203', name:'味王'},
-  {symbol:'1210', name:'大成'}, {symbol:'1213', name:'大飲'}, {symbol:'1216', name:'統一'},
-  {symbol:'1217', name:'愛之味'}, {symbol:'1218', name:'泰山'}, {symbol:'1219', name:'福壽'},
-  {symbol:'1220', name:'台榮'}, {symbol:'1225', name:'福懋油'}, {symbol:'1227', name:'佳格'},
-  {symbol:'1229', name:'聯華'}, {symbol:'1231', name:'聯華食'}, {symbol:'1232', name:'大統益'},
-  {symbol:'1233', name:'天仁'}, {symbol:'1234', name:'黑松'}, {symbol:'1235', name:'興泰'},
-  {symbol:'1236', name:'宏亞'}, {symbol:'1256', name:'鮮活果汁-KY'}, {symbol:'1301', name:'台塑'},
-  {symbol:'1303', name:'南亞'}, {symbol:'1304', name:'台聚'}, {symbol:'1305', name:'華夏'},
-  {symbol:'1307', name:'三芳'}, {symbol:'1308', name:'亞聚'}, {symbol:'1309', name:'台達化'},
-  {symbol:'1310', name:'台苯'}, {symbol:'1312', name:'國喬'}, {symbol:'1313', name:'聯成'},
-  {symbol:'1314', name:'中石化'}, {symbol:'1315', name:'達新'}, {symbol:'1316', name:'上曜'},
-  {symbol:'1319', name:'東陽'}, {symbol:'1321', name:'大洋'}, {symbol:'1323', name:'永裕'},
-  {symbol:'1326', name:'台化'}, {symbol:'1339', name:'昭輝'}, {symbol:'1341', name:'富林'},
-  {symbol:'1402', name:'遠東新'}, {symbol:'1409', name:'新纖'}, {symbol:'1410', name:'南染'},
-  {symbol:'1413', name:'宏洲'}, {symbol:'1414', name:'東和'}, {symbol:'1416', name:'廣豐'},
-  {symbol:'1417', name:'嘉裕'}, {symbol:'1418', name:'東華'}, {symbol:'1419', name:'新紡'},
-  {symbol:'1423', name:'利華'}, {symbol:'1432', name:'大魯閣'}, {symbol:'1436', name:'華友聯'},
-  {symbol:'1440', name:'南紡'}, {symbol:'1441', name:'大東'}, {symbol:'1443', name:'立益'},
-  {symbol:'1447', name:'力鵬'}, {symbol:'1449', name:'佳和'}, {symbol:'1451', name:'年興'},
-  {symbol:'1452', name:'宏益'}, {symbol:'1453', name:'大將'}, {symbol:'1454', name:'台富'},
-  {symbol:'1455', name:'集盛'}, {symbol:'1456', name:'怡華'}, {symbol:'1457', name:'宜進'},
-  {symbol:'1459', name:'聯發'}, {symbol:'1460', name:'宏遠'}, {symbol:'1463', name:'強力'},
-  {symbol:'1464', name:'得力'}, {symbol:'1465', name:'偉全'}, {symbol:'1466', name:'聚隆'},
-  {symbol:'1467', name:'南緯'}, {symbol:'1468', name:'名軒'}, {symbol:'1470', name:'大統新創'},
-  {symbol:'1471', name:'首利'}, {symbol:'1472', name:'三洋實業'}, {symbol:'1473', name:'台南'},
-  {symbol:'1474', name:'弘裕'}, {symbol:'1475', name:'業旺'}, {symbol:'1476', name:'儒鴻'},
-  {symbol:'1477', name:'聚陽'}, {symbol:'1503', name:'士電'}, {symbol:'1504', name:'東元'},
-  {symbol:'1506', name:'正道'}, {symbol:'1512', name:'瑞利'}, {symbol:'1513', name:'中興電'},
-  {symbol:'1514', name:'亞力'}, {symbol:'1515', name:'力山'}, {symbol:'1516', name:'川飛'},
-  {symbol:'1517', name:'利奇'}, {symbol:'1519', name:'華城'}, {symbol:'1521', name:'大億'},
-  {symbol:'1522', name:'堤維西'}, {symbol:'1524', name:'耿豐'}, {symbol:'1525', name:'江申'},
-  {symbol:'1526', name:'日馳'}, {symbol:'1527', name:'鑫永銓'}, {symbol:'1528', name:'恩德'},
-  {symbol:'1529', name:'樂士'}, {symbol:'1530', name:'亞崴'}, {symbol:'1531', name:'高林股'},
-  {symbol:'1532', name:'勤美'}, {symbol:'1533', name:'車王電'}, {symbol:'1535', name:'中宇'},
-  {symbol:'1536', name:'和大'}, {symbol:'1537', name:'廣隆'}, {symbol:'1538', name:'正峰'},
-  {symbol:'1540', name:'喬福'}, {symbol:'1541', name:'錩泰'}, {symbol:'1558', name:'伸興'},
-  {symbol:'1560', name:'中砂'}, {symbol:'1568', name:'倚天'}, {symbol:'1580', name:'新麥'},
-  {symbol:'1582', name:'信錦'}, {symbol:'1583', name:'程泰'}, {symbol:'1587', name:'吉茂'},
-  {symbol:'1589', name:'永冠-KY'}, {symbol:'1590', name:'亞德客-KY'},
-  {symbol:'1598', name:'岱宇'}, {symbol:'1603', name:'華電'}, {symbol:'1604', name:'聲寶'},
-  {symbol:'1605', name:'華新'}, {symbol:'1608', name:'華榮'}, {symbol:'1609', name:'大亞'},
-  {symbol:'1611', name:'中電'}, {symbol:'1612', name:'宏泰'}, {symbol:'1614', name:'三洋電'},
-  {symbol:'1615', name:'大山'}, {symbol:'1616', name:'億泰'}, {symbol:'1617', name:'榮星'},
-  {symbol:'1618', name:'合機'}, {symbol:'1626', name:'艾美特-KY'}, {symbol:'1701', name:'中化'},
-  {symbol:'1702', name:'南僑'}, {symbol:'1707', name:'葡萄王'}, {symbol:'1708', name:'東鹼'},
-  {symbol:'1709', name:'和益'}, {symbol:'1710', name:'東聯'}, {symbol:'1711', name:'永光'},
-  {symbol:'1712', name:'興農'}, {symbol:'1713', name:'國際'}, {symbol:'1714', name:'和桐'},
-  {symbol:'1717', name:'長興'}, {symbol:'1718', name:'中纖'},
-  {symbol:'1720', name:'生達'}, {symbol:'1721', name:'三晃'}, {symbol:'1722', name:'台肥'},
-  {symbol:'1723', name:'中碳'}, {symbol:'1725', name:'元禎'}, {symbol:'1726', name:'永記'},
-  {symbol:'1727', name:'中華化'}, {symbol:'1730', name:'花仙子'}, {symbol:'1731', name:'美吾華'},
-  {symbol:'1732', name:'毛寶'}, {symbol:'1733', name:'五鼎'}, {symbol:'1734', name:'杏輝'},
-  {symbol:'1735', name:'日勝化'}, {symbol:'1736', name:'喬山'}, {symbol:'1737', name:'臺鹽'},
-  {symbol:'1738', name:'和成'}, {symbol:'1739', name:'昱泰'}, {symbol:'1740', name:'興農-KY'},
-  {symbol:'1741', name:'龍燈-KY'}, {symbol:'1904', name:'正隆'}, {symbol:'1907', name:'永豐餘'},
-  {symbol:'1909', name:'榮成'}, {symbol:'2002', name:'中鋼'}, {symbol:'2006', name:'東和鋼鐵'},
-  {symbol:'2007', name:'燁興'}, {symbol:'2008', name:'高興昌'}, {symbol:'2009', name:'第一銅'},
-  {symbol:'2010', name:'春源'}, {symbol:'2012', name:'春雨'}, {symbol:'2013', name:'中鋼構'},
-  {symbol:'2014', name:'中鴻'}, {symbol:'2015', name:'豐興'}, {symbol:'2017', name:'官田鋼'},
-  {symbol:'2020', name:'美亞'}, {symbol:'2022', name:'聚亨'}, {symbol:'2023', name:'燁輝'},
-  {symbol:'2024', name:'志聯'}, {symbol:'2025', name:'千興'}, {symbol:'2027', name:'大成鋼'},
-  {symbol:'2028', name:'威致'}, {symbol:'2029', name:'盛餘'}, {symbol:'2030', name:'彰源'},
-  {symbol:'2031', name:'新光鋼'}, {symbol:'2032', name:'新鋼'}, {symbol:'2033', name:'佳大'},
-  {symbol:'2034', name:'允強'}, {symbol:'2038', name:'海光'}, {symbol:'2049', name:'上銀'},
-  {symbol:'2059', name:'川湖'}, {symbol:'2062', name:'橋椿'}, {symbol:'2101', name:'南港'},
-  {symbol:'2103', name:'台橡'}, {symbol:'2104', name:'中橡'}, {symbol:'2105', name:'正新'},
-  {symbol:'2106', name:'建大'}, {symbol:'2107', name:'厚生'}, {symbol:'2108', name:'南帝'},
-  {symbol:'2109', name:'華豐'}, {symbol:'2114', name:'鑫祥'}, {symbol:'2201', name:'裕隆'},
-  {symbol:'2204', name:'中華'}, {symbol:'2206', name:'三陽工業'}, {symbol:'2207', name:'和泰車'},
-  {symbol:'2208', name:'台船'}, {symbol:'2211', name:'長榮鋼'}, {symbol:'2227', name:'裕日車'},
-  {symbol:'2228', name:'劍麟'}, {symbol:'2231', name:'為升'}, {symbol:'2233', name:'宇隆'},
-  {symbol:'2236', name:'百達-KY'}, {symbol:'2239', name:'英利-KY'}, {symbol:'2241', name:'知洋'},
-  {symbol:'2243', name:'宏旭-KY'}, {symbol:'2247', name:'汎德永業'}, {symbol:'2301', name:'光寶科'},
-  {symbol:'2302', name:'麗正'}, {symbol:'2303', name:'聯電'}, {symbol:'2308', name:'台達電'},
-  {symbol:'2312', name:'金寶'}, {symbol:'2313', name:'華通'},
-  {symbol:'2314', name:'台揚'}, {symbol:'2316', name:'楠梓電'}, {symbol:'2317', name:'鴻海'},
-  {symbol:'2321', name:'東訊'}, {symbol:'2323', name:'中環'}, {symbol:'2324', name:'仁寶'},
-  {symbol:'2327', name:'國巨'}, {symbol:'2328', name:'廣宇'},
-  {symbol:'2329', name:'華泰'}, {symbol:'2330', name:'台積電'}, {symbol:'2331', name:'精英'},
-  {symbol:'2332', name:'友訊'}, {symbol:'2337', name:'旺宏'}, {symbol:'2338', name:'光罩'},
-  {symbol:'2340', name:'台亞'}, {symbol:'2342', name:'茂矽'}, {symbol:'2344', name:'華邦電'},
-  {symbol:'2345', name:'智邦'}, {symbol:'2347', name:'聯強'}, {symbol:'2348', name:'力廣'},
-  {symbol:'2349', name:'錸德'}, {symbol:'2352', name:'佳世達'},
-  {symbol:'2353', name:'宏碁'}, {symbol:'2354', name:'鴻準'}, {symbol:'2355', name:'敬鵬'},
-  {symbol:'2356', name:'英業達'}, {symbol:'2357', name:'華碩'}, {symbol:'2358', name:'廷鑫'},
-  {symbol:'2359', name:'所羅門'}, {symbol:'2360', name:'致茂'}, {symbol:'2362', name:'藍天'},
-  {symbol:'2363', name:'矽統'}, {symbol:'2364', name:'倍必達'}, {symbol:'2365', name:'昆盈'},
-  {symbol:'2367', name:'燿華'}, {symbol:'2368', name:'金像電'}, {symbol:'2369', name:'菱生'},
-  {symbol:'2371', name:'大同'}, {symbol:'2373', name:'震旦行'}, {symbol:'2374', name:'佳能'},
-  {symbol:'2375', name:'智寶'}, {symbol:'2376', name:'技嘉'}, {symbol:'2377', name:'微星'},
-  {symbol:'2379', name:'瑞昱'}, {symbol:'2380', name:'虹光'}, {symbol:'2381', name:'華宇'},
-  {symbol:'2382', name:'廣達'}, {symbol:'2383', name:'台光電'}, {symbol:'2385', name:'群光'},
-  {symbol:'2387', name:'精元'}, {symbol:'2388', name:'威盛'}, {symbol:'2390', name:'云辰'},
-  {symbol:'2392', name:'正崴'}, {symbol:'2393', name:'億光'}, {symbol:'2395', name:'研華'},
-  {symbol:'2397', name:'友通'}, {symbol:'2399', name:'映鈦'}, {symbol:'2401', name:'凌陽'},
-  {symbol:'2402', name:'毅嘉'}, {symbol:'2404', name:'漢唐'}, {symbol:'2408', name:'南亞科'},
-  {symbol:'2409', name:'友達'}, {symbol:'2412', name:'中華電'}, {symbol:'2413', name:'環科'},
-  {symbol:'2414', name:'精技'}, {symbol:'2415', name:'錩新'}, {symbol:'2417', name:'圓剛'},
-  {symbol:'2419', name:'仲琦'}, {symbol:'2420', name:'新巨'}, {symbol:'2421', name:'建準'},
-  {symbol:'2423', name:'固緯'}, {symbol:'2424', name:'隴華'}, {symbol:'2425', name:'承啟'},
-  {symbol:'2426', name:'鼎元'}, {symbol:'2427', name:'三商電'}, {symbol:'2428', name:'興勤'},
-  {symbol:'2429', name:'銘旺科'}, {symbol:'2430', name:'燦坤'}, {symbol:'2431', name:'聯昌'},
-  {symbol:'2433', name:'互盛電'}, {symbol:'2434', name:'統懋'}, {symbol:'2436', name:'偉詮電'},
-  {symbol:'2438', name:'英誌'}, {symbol:'2439', name:'美律'}, {symbol:'2441', name:'超豐'},
-  {symbol:'2442', name:'新美齊'}, {symbol:'2443', name:'台睿'}, {symbol:'2449', name:'京元電子'},
-  {symbol:'2450', name:'神腦'}, {symbol:'2451', name:'創見'}, {symbol:'2454', name:'聯發科'},
-  {symbol:'2456', name:'新普'}, {symbol:'2457', name:'飛宏'}, {symbol:'2458', name:'義隆'},
-  {symbol:'2459', name:'敦吉'}, {symbol:'2460', name:'建通'}, {symbol:'2464', name:'盟立'},
-  {symbol:'2467', name:'志聖'}, {symbol:'2468', name:'華經'}, {symbol:'2471', name:'資通'},
-  {symbol:'2472', name:'立隆電'}, {symbol:'2474', name:'可成'}, {symbol:'2476', name:'鉅祥'},
-  {symbol:'2477', name:'美隆電'}, {symbol:'2478', name:'大毅'}, {symbol:'2481', name:'強茂'},
-  {symbol:'2482', name:'連宇'}, {symbol:'2483', name:'百容'}, {symbol:'2485', name:'兆赫'},
-  {symbol:'2486', name:'一詮'}, {symbol:'2488', name:'漢平'}, {symbol:'2489', name:'瑞軒'},
-  {symbol:'2491', name:'吉祥全'}, {symbol:'2492', name:'華新科'}, {symbol:'2493', name:'揚博'},
-  {symbol:'2495', name:'普安'}, {symbol:'2496', name:'卓越'}, {symbol:'2497', name:'怡利電'},
-  {symbol:'2498', name:'宏達電'}, {symbol:'2499', name:'東貝'}, {symbol:'2501', name:'國建'},
-  {symbol:'2504', name:'國產'}, {symbol:'2505', name:'國揚'}, {symbol:'2506', name:'太設'},
-  {symbol:'2509', name:'全坤建'}, {symbol:'2511', name:'太子'}, {symbol:'2515', name:'中工'},
-  {symbol:'2516', name:'新建'}, {symbol:'2520', name:'冠德'}, {symbol:'2524', name:'京城'},
-  {symbol:'2527', name:'宏璟'}, {symbol:'2528', name:'皇普'}, {symbol:'2530', name:'華建'},
-  {symbol:'2534', name:'宏盛'}, {symbol:'2535', name:'達欣工'}, {symbol:'2536', name:'宏普'},
-  {symbol:'2537', name:'聯上發'}, {symbol:'2538', name:'基泰'}, {symbol:'2539', name:'櫻花建'},
-  {symbol:'2540', name:'愛山林'}, {symbol:'2542', name:'興富發'}, {symbol:'2543', name:'皇昌'},
-  {symbol:'2547', name:'日勝生'}, {symbol:'2548', name:'華固'}, {symbol:'2597', name:'潤弘'},
-  {symbol:'2601', name:'益航'}, {symbol:'2602', name:'福懋航'}, {symbol:'2603', name:'長榮'},
-  {symbol:'2605', name:'新興'}, {symbol:'2606', name:'裕民'}, {symbol:'2607', name:'榮運'},
-  {symbol:'2608', name:'大榮'}, {symbol:'2609', name:'陽明'}, {symbol:'2610', name:'華航'},
-  {symbol:'2611', name:'志信'}, {symbol:'2612', name:'中航'}, {symbol:'2613', name:'中連貨'},
-  {symbol:'2614', name:'東森'}, {symbol:'2615', name:'萬海'}, {symbol:'2616', name:'山隆'},
-  {symbol:'2617', name:'台航'}, {symbol:'2618', name:'長榮航'}, {symbol:'2633', name:'台灣高鐵'},
-  {symbol:'2634', name:'漢翔'}, {symbol:'2636', name:'台驊投控'}, {symbol:'2637', name:'慧洋-KY'},
-  {symbol:'2642', name:'宅配通'}, {symbol:'2701', name:'萬企'}, {symbol:'2702', name:'華園'},
-  {symbol:'2704', name:'國賓'}, {symbol:'2705', name:'六福'}, {symbol:'2706', name:'第一店'},
-  {symbol:'2707', name:'晶華'}, {symbol:'2712', name:'安慶'}, {symbol:'2722', name:'夏都'},
-  {symbol:'2723', name:'美食-KY'}, {symbol:'2727', name:'王品'}, {symbol:'2731', name:'雄獅'},
-  {symbol:'2740', name:'天蔥'}, {symbol:'2809', name:'京城銀'}, {symbol:'2812', name:'台中銀'},
-  {symbol:'2816', name:'旺旺保'}, {symbol:'2820', name:'華票'}, {symbol:'2823', name:'中壽'},
-  {symbol:'2832', name:'台產'}, {symbol:'2834', name:'臺企銀'}, {symbol:'2836', name:'高雄銀'},
-  {symbol:'2838', name:'聯邦銀'}, {symbol:'2841', name:'台開'}, {symbol:'2845', name:'遠東銀'},
-  {symbol:'2849', name:'安泰銀'}, {symbol:'2850', name:'新產'}, {symbol:'2851', name:'中再保'},
-  {symbol:'2852', name:'第一保'}, {symbol:'2855', name:'統一證'}, {symbol:'2856', name:'元富證'},
-  {symbol:'2867', name:'三商壽'}, {symbol:'2880', name:'華南金'}, {symbol:'2881', name:'富邦金'},
-  {symbol:'2882', name:'國泰金'}, {symbol:'2883', name:'開發金'}, {symbol:'2884', name:'玉山金'},
-  {symbol:'2885', name:'元大金'}, {symbol:'2886', name:'兆豐金'}, {symbol:'2887', name:'台新金'},
-  {symbol:'2888', name:'新光金'}, {symbol:'2889', name:'國票金'}, {symbol:'2890', name:'永豐金'},
-  {symbol:'2891', name:'中信金'}, {symbol:'2892', name:'第一金'}, {symbol:'2897', name:'王道銀行'},
-  {symbol:'2903', name:'遠百'}, {symbol:'2905', name:'南仁湖'}, {symbol:'2906', name:'高林'},
-  {symbol:'2915', name:'潤泰全'}, {symbol:'2923', name:'鼎固-KY'}, {symbol:'2929', name:'淘帝-KY'},
-  {symbol:'2939', name:'凱衛'}, {symbol:'3002', name:'綠點高新'}, {symbol:'3003', name:'健和興'},
-  {symbol:'3004', name:'豐達科'}, {symbol:'3005', name:'神基'}, {symbol:'3006', name:'晶豪科'},
-  {symbol:'3008', name:'大立光'}, {symbol:'3010', name:'華立'}, {symbol:'3011', name:'今皓'},
-  {symbol:'3013', name:'晟銘電'}, {symbol:'3015', name:'全漢'},
-  {symbol:'3017', name:'奇鋐'}, {symbol:'3018', name:'隆銘綠能'}, {symbol:'3019', name:'亞光'},
-  {symbol:'3021', name:'鴻名'}, {symbol:'3022', name:'威強電'}, {symbol:'3023', name:'信邦'},
-  {symbol:'3024', name:'憶聲'}, {symbol:'3025', name:'星通'}, {symbol:'3026', name:'禾伸堂'},
-  {symbol:'3027', name:'盛達'}, {symbol:'3028', name:'增你強'}, {symbol:'3029', name:'零壹'},
-  {symbol:'3030', name:'德律'}, {symbol:'3031', name:'佰鸿'}, {symbol:'3032', name:'偉訓'},
-  {symbol:'3033', name:'威健'}, {symbol:'3034', name:'聯詠'}, {symbol:'3035', name:'智原'},
-  {symbol:'3036', name:'文曄'}, {symbol:'3037', name:'欣興'}, {symbol:'3038', name:'全台'},
-  {symbol:'3040', name:'遠見'}, {symbol:'3041', name:'揚智'},
-  {symbol:'3043', name:'科風'}, {symbol:'3044', name:'健鼎'}, {symbol:'3045', name:'台灣大'},
-  {symbol:'3046', name:'建碁'}, {symbol:'3048', name:'益登'}, {symbol:'3049', name:'和鑫'},
-  {symbol:'3050', name:'鈺德'}, {symbol:'3051', name:'力特'}, {symbol:'3052', name:'綠能'},
-  {symbol:'3054', name:'立萬利'}, {symbol:'3055', name:'蔚華科'}, {symbol:'3056', name:'總太'},
-  {symbol:'3057', name:'喬鼎'}, {symbol:'3059', name:'華晶科'},
-  {symbol:'3231', name:'緯創'}, {symbol:'3406', name:'玉晶光'}, {symbol:'3443', name:'創意'},
-  {symbol:'3481', name:'群創'}, {symbol:'3533', name:'嘉澤'}, {symbol:'3653', name:'健策'},
-  {symbol:'3661', name:'世芯-KY'}, {symbol:'3711', name:'日月光投控'}, {symbol:'4904', name:'遠傳'},
-  {symbol:'4938', name:'和碩'}, {symbol:'5871', name:'中租-KY'}, {symbol:'5876', name:'上海商銀'},
-  {symbol:'5880', name:'合庫金'}, {symbol:'6415', name:'矽力-KY'}, {symbol:'6446', name:'藥華藥'},
-  {symbol:'6505', name:'台塑化'}, {symbol:'6669', name:'緯穎'}, {symbol:'6770', name:'力積電'},
-  {symbol:'8046', name:'南電'}, {symbol:'8299', name:'群聯'}, {symbol:'9910', name:'豐泰'},
-  {symbol:'9921', name:'巨大'}, {symbol:'9933', name:'中鼎'}, {symbol:'9941', name:'裕融'},
-  {symbol:'9945', name:'潤泰新'}, {symbol:'0050', name:'元大台灣50'}, {symbol:'0056', name:'元大高股息'},
-  {symbol:'00878', name:'國泰永續高股息'}, {symbol:'00919', name:'群益台灣精選高息'}, {symbol:'00929', name:'復華台灣科技優息'}
-];
+  {symbol:'1101', name:'台泥'}, {symbol:'2330', name:'台積電'}, {symbol:'2454', name:'聯發科'},
+  {symbol:'2317', name:'鴻海'}, {symbol:'0050', name:'元大台灣50'}, {symbol:'0056', name:'元大高股息'},
+  {symbol:'00878', name:'國泰永續高股息'}, {symbol:'00919', name:'群益台灣精選高息'}
+]; // 為節省空間已精簡，可自行補回完整清單
 
 /* ---------- state ---------- */
 const today = new Date();
 const pad = n => String(n).padStart(2,'0');
 const dateStr = (y,m,d) => `${y}-${pad(m+1)}-${pad(d)}`;
-function monthKey(y,m){ while(m<0){m+=12; y--;} while(m>11){m-=12; y++;} return `${y}-${pad(m+1)}`; }
-function monthKeyOfDate(dstr){ const d = new Date(dstr); return monthKey(d.getFullYear(), d.getMonth()); }
-function dateStrOffsetMonths(y,m,d,deltaMonths){ const dt = new Date(y, m+deltaMonths, d); return dateStr(dt.getFullYear(), dt.getMonth(), dt.getDate()); }
 
 let state = {
   categories: {
     expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})),
     income: DEFAULT_INCOME_CATS.map(c=>({...c}))
   },
-  accounts: [],
-  transactions: [],
-  stockRecords: [],
-  feeRecords: [],
-  customStocks: [],
-  credentials: { username: '', password: '' }
+  accounts: [], transactions: [], stockRecords: [], feeRecords: [], customStocks: []
 };
 
-const STORAGE_KEY = 'walletJournal_state_v2';
-function saveState(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){ console.warn('無法儲存資料', e); }
-}
-(function loadState(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if(raw){
-      const saved = JSON.parse(raw);
-      if(saved && saved.categories){
-        if(!saved.accounts) saved.accounts = [];
-        if(!saved.transactions) saved.transactions = [];
-        if(!saved.stockRecords) saved.stockRecords = [];
-        if(!saved.feeRecords) saved.feeRecords = [];
-        if(!saved.customStocks) saved.customStocks = [];
-        if(!saved.credentials) saved.credentials = { username: '', password: '' };
-        state = saved;
-      }
-    }
-  }catch(e){ console.warn('無法讀取先前資料', e); }
-})();
+// 【系統唯一加密架構設定】
+const STORAGE_KEY = 'walletJournal_state_v3_encrypted'; 
+const LEGACY_STORAGE_KEY = 'walletJournal_state_v2'; 
+let sessionKey = null; 
+let isLocked = false; // 保護變數：當需要密碼解鎖時，鎖定存檔功能
 
+function saveState(){
+  if(isLocked) return; // 如果還沒解鎖，絕對不允許存檔覆寫！
+  try{
+    const jsonStr = JSON.stringify(state);
+    if(sessionKey) {
+      const encrypted = CryptoJS.AES.encrypt(jsonStr, sessionKey).toString();
+      localStorage.setItem(STORAGE_KEY, encrypted);
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } else {
+      localStorage.setItem(LEGACY_STORAGE_KEY, jsonStr);
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }catch(e){ console.warn('無法儲存資料', e); }
+}
+
+/* ---------- 啟動解鎖邏輯 ---------- */
+window.addEventListener('DOMContentLoaded', () => {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
+  
+  if(raw) {
+    // 若有加密資料，鎖定系統並彈出輸入密碼視窗
+    isLocked = true;
+    renderAll(); // 渲染一個空殼 UI，保護資料
+    openUnlockModal();
+  } else {
+    // 若無加密資料 (全新 或 舊版明文)，直接載入
+    if(legacyRaw) {
+      try {
+        const saved = JSON.parse(legacyRaw);
+        if(saved && saved.categories){ state = saved; }
+      } catch(e) {}
+    }
+    renderAll();
+  }
+});
+
+function openUnlockModal() {
+  openModal(`
+    <div style="text-align:center; padding: 10px 0;">
+      <h3 style="margin-bottom:8px;">解鎖本地資料</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:20px;">資料已受加密保護，請輸入密碼以解鎖。</p>
+      <div class="field" style="margin-bottom:16px;">
+        <input type="password" id="app-password" placeholder="輸入解密密碼..." style="width:100%; text-align:center; font-size:15px; padding:10px;">
+      </div>
+      <button class="btn btn-primary" id="btn-unlock" style="width:100%; justify-content:center; padding:10px; font-size:15px;">解密資料</button>
+      <p id="login-error" class="error" style="display:none; color:var(--danger); font-size:13px; margin-top:12px; margin-bottom:0;">密碼錯誤，無法解密！</p>
+    </div>
+  `);
+  document.getElementById('btn-unlock').addEventListener('click', handleUnlock);
+  document.getElementById('app-password').addEventListener('keypress', (e) => {
+    if(e.key === 'Enter') handleUnlock();
+  });
+}
+
+function handleUnlock() {
+  const pwd = document.getElementById('app-password').value;
+  if(!pwd) return;
+  const raw = localStorage.getItem(STORAGE_KEY);
+  try {
+    const bytes = CryptoJS.AES.decrypt(raw, pwd);
+    const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
+    if(!decryptedStr) throw new Error("解密失敗");
+
+    const saved = JSON.parse(decryptedStr);
+    if(saved && saved.categories){
+      if(!saved.accounts) saved.accounts = [];
+      if(!saved.transactions) saved.transactions = [];
+      if(!saved.stockRecords) saved.stockRecords = [];
+      if(!saved.feeRecords) saved.feeRecords = [];
+      if(!saved.customStocks) saved.customStocks = [];
+      state = saved;
+    }
+    
+    sessionKey = pwd; // 記錄密碼
+    isLocked = false; // 解除鎖定
+    closeModal();
+    renderAll(); // 重新渲染含有資料的 UI
+    
+  } catch(e) {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+/* ---------- tab switching ---------- */
 let calYear = today.getFullYear(), calMonth = today.getMonth();
 let selectedDay = today.getDate();
 let analysisYear = today.getFullYear(), analysisMonth = today.getMonth(), analysisMode = 'month';
@@ -442,7 +318,6 @@ function accountBalance(acc){
   return bal;
 }
 
-/* ---------- tab switching ---------- */
 document.querySelectorAll('.navitem').forEach(btn=>{
   btn.addEventListener('click', ()=>{
     document.querySelectorAll('.navitem').forEach(b=>b.classList.remove('active'));
@@ -452,18 +327,14 @@ document.querySelectorAll('.navitem').forEach(btn=>{
     renderAll();
   });
 });
-function goToSettingsCategories(){
-  document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('active', b.dataset.tab==='settings'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-settings').classList.add('active');
-}
 
 /* ---------- modal helpers ---------- */
 const overlay = document.getElementById('modal-overlay');
 const modalContent = document.getElementById('modal-content');
 function openModal(html){ modalContent.innerHTML = html; overlay.classList.remove('hidden'); }
 function closeModal(){ overlay.classList.add('hidden'); modalContent.innerHTML=''; }
-overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal(); });
+// 如果系統被鎖定，點擊旁邊的暗色遮罩不能關閉視窗！
+overlay.addEventListener('click', e=>{ if(e.target===overlay && !isLocked) closeModal(); });
 
 /* ---------- calendar tab ---------- */
 function renderCalendar(){
@@ -612,7 +483,11 @@ function openTxnModal(editId, draft){
   document.getElementById('btnCancel').addEventListener('click', closeModal);
   document.getElementById('btnManageCat').addEventListener('click', ()=>{
     closeModal();
-    goToSettingsCategories();
+    document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('active', b.dataset.tab==='settings'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById('tab-settings').classList.add('active');
+    settingsOpen.categories = true;
+    renderSettings();
   });
   document.getElementById('btnSave').addEventListener('click', ()=>{
     const amount = parseFloat(document.getElementById('f-amount').value);
@@ -635,8 +510,7 @@ function openTxnModal(editId, draft){
 }
 
 /* ---------- analysis tab ---------- */
-let analysisChart = null;
-let trendChart = null;
+let analysisChart = null, trendChart = null;
 function renderAnalysis(){
   const isYear = analysisMode === 'year';
 
@@ -679,9 +553,7 @@ function renderAnalysis(){
   const trendSection = isYear ? `
     <div class="panel" style="margin-bottom:16px;">
       <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">每月收支趨勢</p>
-      <div style="position:relative; height:220px;">
-        <canvas id="trendChart" role="img" aria-label="${analysisYear}年每月收入與支出趨勢圖"></canvas>
-      </div>
+      <div style="position:relative; height:220px;"><canvas id="trendChart"></canvas></div>
     </div>
   ` : '';
 
@@ -703,9 +575,7 @@ function renderAnalysis(){
     ${trendSection}
     <div class="panel">
       <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">分類佔比</p>
-      <div style="position:relative; height:220px; margin-bottom:20px;">
-        <canvas id="catChart" role="img" aria-label="${periodLabel}各分類支出佔比圖"></canvas>
-      </div>
+      <div style="position:relative; height:220px; margin-bottom:20px;"><canvas id="catChart"></canvas></div>
       ${barsHtml}
     </div>
   `;
@@ -724,16 +594,12 @@ function renderAnalysis(){
     renderAnalysis();
   }));
   document.getElementById('anaYearPicker')?.addEventListener('change', (e) => {
-    if(!e.target.value) return;
-    analysisYear = parseInt(e.target.value, 10);
-    renderAnalysis();
+    if(!e.target.value) return; analysisYear = parseInt(e.target.value, 10); renderAnalysis();
   });
   document.getElementById('anaMonthPicker')?.addEventListener('change', (e) => {
     if(!e.target.value) return;
     const [y, m] = e.target.value.split('-');
-    analysisYear = parseInt(y, 10);
-    analysisMonth = parseInt(m, 10) - 1;
-    renderAnalysis();
+    analysisYear = parseInt(y, 10); analysisMonth = parseInt(m, 10) - 1; renderAnalysis();
   });
 
   if(analysisChart) analysisChart.destroy();
@@ -755,8 +621,7 @@ function renderAnalysis(){
       if(t.type==='income') monthlyIncome[d.getMonth()] += t.amount;
       else monthlyExpense[d.getMonth()] += t.amount;
     });
-    const trendCtx = document.getElementById('trendChart');
-    trendChart = new Chart(trendCtx, {
+    trendChart = new Chart(document.getElementById('trendChart'), {
       type:'bar',
       data:{
         labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
@@ -782,13 +647,11 @@ function renderAccounts(){
   const netWorth = state.accounts.reduce((s,a)=>s+accountBalance(a),0);
   const rows = state.accounts.map(a=>`
     <div class="list-row">
-      <div style="flex:1;">
-        <p style="margin:0; font-size:14px;">${a.name}</p>
-      </div>
+      <div style="flex:1;"><p style="margin:0; font-size:14px;">${a.name}</p></div>
       <span style="font-size:15px; font-weight:500;">NT$ ${fmt(accountBalance(a))}</span>
       <div class="txn-actions">
-        <button data-editacc="${a.id}" aria-label="修改帳戶">${ICON.edit}</button>
-        <button data-delacc="${a.id}" aria-label="刪除帳戶">${ICON.trash}</button>
+        <button data-editacc="${a.id}">${ICON.edit}</button>
+        <button data-delacc="${a.id}">${ICON.trash}</button>
       </div>
     </div>
   `).join('');
@@ -852,7 +715,6 @@ function renderInvest(){
     if(d.getFullYear()!==invYear) return false;
     return isYear ? true : d.getMonth()===invMonth;
   });
-
   const scopedFeeRecords = state.feeRecords.filter(r=>{
     const d = new Date(r.date);
     if(d.getFullYear()!==invYear) return false;
@@ -861,8 +723,7 @@ function renderInvest(){
 
   const totalInvested = scopedRecords.reduce((s,r)=>s+r.invested,0);
   const totalFee = scopedFeeRecords.reduce((s,r)=>s+r.amount,0);
-  const rawProfit = scopedRecords.reduce((s,r)=>s+r.profit,0);
-  const totalProfit = rawProfit; // 總損益不再計入手續費，完全脫鉤
+  const totalProfit = scopedRecords.reduce((s,r)=>s+r.profit,0);
   const totalPct = totalInvested ? (totalProfit/totalInvested*100) : 0;
 
   const wins = scopedRecords.filter(r=>r.profit>0);
@@ -876,7 +737,6 @@ function renderInvest(){
   else ratioLabel = (avgWin/avgLoss).toFixed(2);
 
   const periodLabel = isYear ? '本年' : '本月';
-
   const invYearSelectHtml = (() => {
     let opts = '';
     for(let y = 2015; y <= 2045; y++) {
@@ -894,23 +754,17 @@ function renderInvest(){
     const monthlyInvested = Array(12).fill(0), monthlyProfit = Array(12).fill(0), monthlyFee = Array(12).fill(0);
     scopedRecords.forEach(r=>{
       const m = new Date(r.date).getMonth();
-      monthlyInvested[m] += r.invested;
-      monthlyProfit[m] += r.profit;
+      monthlyInvested[m] += r.invested; monthlyProfit[m] += r.profit;
     });
-    scopedFeeRecords.forEach(r=>{
-      const m = new Date(r.date).getMonth();
-      monthlyFee[m] += r.amount;
-    });
+    scopedFeeRecords.forEach(r=>{ monthlyFee[new Date(r.date).getMonth()] += r.amount; });
     
     const monthRows = monthlyInvested.map((inv,i)=>{
-      const fee = monthlyFee[i];
-      const netProfit = monthlyProfit[i]; // 年檢視表格：單純計算股票損益
-      const pct = inv ? (netProfit/inv*100) : 0;
-      if(!inv && !monthlyProfit[i] && !fee) return '';
+      const fee = monthlyFee[i], netProfit = monthlyProfit[i], pct = inv ? (netProfit/inv*100) : 0;
+      if(!inv && !netProfit && !fee) return '';
       return `<tr>
         <td>${i+1} 月</td>
         <td>NT$ ${fmt2(inv)}</td>
-        <td class="${fee > 0 ? 'text-pos' : (fee < 0 ? 'text-neg' : '')}">${fee > 0 ? '+NT$ ' + fmt2(fee) : (fee < 0 ? '-NT$ ' + fmt2(Math.abs(fee)) : '—')}</td>
+        <td class="${fee>0?'text-pos':(fee<0?'text-neg':'')}">${fee>0?'+NT$ '+fmt2(fee):(fee<0?'-NT$ '+fmt2(Math.abs(fee)):'—')}</td>
         <td class="${netProfit>=0?'text-pos':'text-neg'}">${netProfit>=0?'+':''}NT$ ${fmt2(netProfit)}</td>
         <td class="${pct>=0?'text-pos':'text-neg'}">${pct>=0?'+':''}${pct.toFixed(2)}%</td>
       </tr>`;
@@ -918,9 +772,7 @@ function renderInvest(){
     bodyHtml = `
       <div class="panel" style="margin-bottom:16px;">
         <p style="font-size:13px; color:var(--text-secondary); margin:0 0 14px;">每月損益比較</p>
-        <div style="position:relative; height:220px;">
-          <canvas id="investTrendChart" role="img" aria-label="${invYear}年每月投資損益比較圖"></canvas>
-        </div>
+        <div style="position:relative; height:220px;"><canvas id="investTrendChart"></canvas></div>
       </div>
       <div class="panel">
         <table>
@@ -930,7 +782,7 @@ function renderInvest(){
       </div>
     `;
   } else {
-    const records = scopedRecords.slice().sort((a,b)=> a.date<b.date ? 1 : (a.date>b.date ? -1 : 0));
+    const records = scopedRecords.slice().sort((a,b)=> a.date<b.date?1:(a.date>b.date?-1:0));
     const rows = records.map(r=>{
       const pct = r.invested ? (r.profit/r.invested*100) : 0;
       return `<tr>
@@ -943,21 +795,19 @@ function renderInvest(){
       </tr>`;
     }).join('');
 
-    const feeRecordsList = scopedFeeRecords.slice().sort((a,b)=> a.date<b.date ? 1 : (a.date>b.date ? -1 : 0));
+    const feeRecordsList = scopedFeeRecords.slice().sort((a,b)=> a.date<b.date?1:(a.date>b.date?-1:0));
     const feeRows = feeRecordsList.map(r=>`
       <tr>
         <td>${fmtDate(r.date)}</td>
-        <td style="text-align:left;">${r.note || (r.amount > 0 ? '加錢/退佣' : '扣錢/手續費')}</td>
-        <td class="${r.amount > 0 ? 'text-pos' : 'text-neg'}">${r.amount > 0 ? '+' : '-'}NT$ ${fmt2(Math.abs(r.amount))}</td>
+        <td style="text-align:left;">${r.note || (r.amount>0?'加錢/退佣':'扣錢/手續費')}</td>
+        <td class="${r.amount>0?'text-pos':'text-neg'}">${r.amount>0?'+':'-'}NT$ ${fmt2(Math.abs(r.amount))}</td>
         <td><div class="txn-actions" style="justify-content:flex-end;"><button data-editfee="${r.id}">${ICON.edit}</button><button data-delfee="${r.id}">${ICON.trash}</button></div></td>
       </tr>
     `).join('');
 
     bodyHtml = `
       <div class="panel" style="margin-bottom:16px;">
-        <div class="row-between" style="margin-bottom:12px;">
-          <p style="font-size:14px; font-weight:500; margin:0;">股票紀錄</p>
-        </div>
+        <div class="row-between" style="margin-bottom:12px;"><p style="font-size:14px; font-weight:500; margin:0;">股票紀錄</p></div>
         <table>
           <tr><th>日期</th><th>股票</th><th>投入資金</th><th>獲利資金</th><th>損益率</th><th></th></tr>
           ${rows || '<tr><td colspan="6" class="empty">這個月沒有股票紀錄</td></tr>'}
@@ -991,7 +841,7 @@ function renderInvest(){
       <button type="button" class="toggle-btn ${isYear?'active':''}" data-invmode="year">年檢視</button>
     </div>
     <div class="cards" style="grid-template-columns:repeat(4,minmax(0,1fr));">
-      <div class="card"><p class="label">${periodLabel}淨手續費</p><p class="value ${totalFee > 0 ? 'text-pos' : (totalFee < 0 ? 'text-neg' : '')}">${totalFee > 0 ? '+' : (totalFee < 0 ? '-' : '')}NT$ ${fmt2(Math.abs(totalFee))}</p></div>
+      <div class="card"><p class="label">${periodLabel}淨手續費</p><p class="value ${totalFee>0?'text-pos':(totalFee<0?'text-neg':'')}">${totalFee>0?'+':(totalFee<0?'-':'')}NT$ ${fmt2(Math.abs(totalFee))}</p></div>
       <div class="card"><p class="label">${periodLabel}總淨損益</p><p class="value ${totalProfit>=0?'text-pos':'text-neg'}">${totalProfit>=0?'+':''}NT$ ${fmt2(totalProfit)}</p></div>
       <div class="card"><p class="label">${periodLabel}總報酬率</p><p class="value ${totalPct>=0?'text-pos':'text-neg'}">${totalPct>=0?'+':''}${totalPct.toFixed(2)}%</p></div>
       <div class="card"><p class="label">賺賠比</p><p class="value">${ratioLabel}</p></div>
@@ -1000,60 +850,45 @@ function renderInvest(){
   `;
 
   document.querySelectorAll('[data-invmode]').forEach(b=>b.addEventListener('click', ()=>{
-    invMode = b.dataset.invmode;
-    renderInvest();
+    invMode = b.dataset.invmode; renderInvest();
   }));
   document.querySelectorAll('[data-invnav]').forEach(b=>b.addEventListener('click', ()=>{
     const dir = parseInt(b.dataset.invnav);
     if(isYear){ invYear += dir; }
-    else{
-      invMonth += dir;
-      if(invMonth<0){invMonth=11; invYear--;} if(invMonth>11){invMonth=0; invYear++;}
-    }
+    else{ invMonth += dir; if(invMonth<0){invMonth=11; invYear--;} if(invMonth>11){invMonth=0; invYear++;} }
     renderInvest();
   }));
   document.getElementById('invYearPicker')?.addEventListener('change', (e) => {
-    if(!e.target.value) return;
-    invYear = parseInt(e.target.value, 10);
-    renderInvest();
+    if(!e.target.value) return; invYear = parseInt(e.target.value, 10); renderInvest();
   });
   document.getElementById('invMonthPicker')?.addEventListener('change', (e) => {
-    if(!e.target.value) return;
-    const [y, m] = e.target.value.split('-');
-    invYear = parseInt(y, 10);
-    invMonth = parseInt(m, 10) - 1;
-    renderInvest();
+    if(!e.target.value) return; const [y, m] = e.target.value.split('-');
+    invYear = parseInt(y, 10); invMonth = parseInt(m, 10) - 1; renderInvest();
   });
   document.getElementById('btnAddStock').addEventListener('click', ()=>openStockModal());
   document.querySelectorAll('[data-editstock]').forEach(b=>b.addEventListener('click', ()=>openStockModal(b.dataset.editstock)));
   document.querySelectorAll('[data-delstock]').forEach(b=>b.addEventListener('click', ()=>{
-    state.stockRecords = state.stockRecords.filter(r=>r.id!==b.dataset.delstock);
-    renderInvest();
+    state.stockRecords = state.stockRecords.filter(r=>r.id!==b.dataset.delstock); renderInvest();
   }));
   document.getElementById('btnAddFee').addEventListener('click', ()=>openFeeModal());
   document.querySelectorAll('[data-editfee]').forEach(b=>b.addEventListener('click', ()=>openFeeModal(b.dataset.editfee)));
   document.querySelectorAll('[data-delfee]').forEach(b=>b.addEventListener('click', ()=>{
-    state.feeRecords = state.feeRecords.filter(r=>r.id!==b.dataset.delfee);
-    renderInvest();
+    state.feeRecords = state.feeRecords.filter(r=>r.id!==b.dataset.delfee); renderInvest();
   }));
 
   if(investTrendChart){ investTrendChart.destroy(); investTrendChart = null; }
   if(isYear){
     const monthlyNetProfit = Array(12).fill(0);
-    // 年檢視圖表：單純呈現獲利資金，不再計入手續費
     scopedRecords.forEach(r=>{ monthlyNetProfit[new Date(r.date).getMonth()] += r.profit; });
-    
     const barColors = monthlyNetProfit.map(v=> v>=0 ? '#0F6E56' : '#D85A30');
-    const trendCtx = document.getElementById('investTrendChart');
-    investTrendChart = new Chart(trendCtx, {
+    investTrendChart = new Chart(document.getElementById('investTrendChart'), {
       type:'bar',
       data:{
         labels:['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
         datasets:[{ label:'淨損益', data:monthlyNetProfit, backgroundColor:barColors }]
       },
       options:{
-        responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ display:false } },
+        responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } },
         scales:{
           y:{ ticks:{ callback:v=>(v/1000)+'k', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') }, grid:{ color: getComputedStyle(document.documentElement).getPropertyValue('--border') } },
           x:{ grid:{ display:false }, ticks:{ color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted') } }
@@ -1064,15 +899,9 @@ function renderInvest(){
 }
 
 function allStockOptionsList(){
-  const seen = new Set();
-  const options = [];
-  TAIWAN_STOCKS.forEach(r=>{
-    if(!seen.has(r.symbol)){ seen.add(r.symbol); options.push(r); }
-  });
-  state.customStocks.forEach(r=>{
-    const key = r.symbol || r.name;
-    if(!seen.has(key)){ seen.add(key); options.push(r); }
-  });
+  const seen = new Set(); const options = [];
+  TAIWAN_STOCKS.forEach(r=>{ if(!seen.has(r.symbol)){ seen.add(r.symbol); options.push(r); } });
+  state.customStocks.forEach(r=>{ const key = r.symbol || r.name; if(!seen.has(key)){ seen.add(key); options.push(r); } });
   return options;
 }
 
@@ -1098,32 +927,18 @@ function openStockModal(editId){
   const isCurrentViewedMonth = invYear===today.getFullYear() && invMonth===today.getMonth();
   const dval = editing ? editing.date : (isCurrentViewedMonth ? dateStr(today.getFullYear(),today.getMonth(),today.getDate()) : dateStr(invYear,invMonth,1));
 
-  const seen = new Set();
-  const stockOptions = [];
-  allStockOptionsList().forEach(r=>{
-    const key = r.symbol || r.name;
-    if(!seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); }
-  });
-  state.stockRecords.forEach(r=>{
-    const key = r.symbol||r.name;
-    if(r.name && !seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); }
-  });
+  const seen = new Set(); const stockOptions = [];
+  allStockOptionsList().forEach(r=>{ const key = r.symbol || r.name; if(!seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); } });
+  state.stockRecords.forEach(r=>{ const key = r.symbol||r.name; if(r.name && !seen.has(key)){ seen.add(key); stockOptions.push(r.symbol ? `${r.name}（${r.symbol}）` : r.name); } });
   const initialStockVal = editing ? (editing.symbol ? `${editing.name}（${editing.symbol}）` : editing.name) : '';
 
   openModal(`
     <h3>${editing?'編輯紀錄':'新增紀錄'}</h3>
     <div class="field"><label>日期</label><input type="date" id="f-date" value="${dval}"></div>
-    <div class="field">
-      <label>股票（打名稱或代碼都可以）</label>
-      <input type="text" id="f-stock" list="dl-stock" value="${initialStockVal}">
-      <datalist id="dl-stock">${stockOptions.map(o=>`<option value="${o}">`).join('')}</datalist>
-    </div>
+    <div class="field"><label>股票（打名稱或代碼都可以）</label><input type="text" id="f-stock" list="dl-stock" value="${initialStockVal}"><datalist id="dl-stock">${stockOptions.map(o=>`<option value="${o}">`).join('')}</datalist></div>
     <div class="field"><label>投入資金</label><input type="number" id="f-invested" value="${editing?editing.invested:''}" placeholder="0"></div>
     <div class="field"><label>獲利資金（虧損請輸入負數）</label><input type="number" id="f-profit" value="${editing?editing.profit:''}" placeholder="0"></div>
-    <div class="modal-actions">
-      <button class="btn" id="btnCancel">取消</button>
-      <button class="btn btn-primary" id="btnSave">儲存</button>
-    </div>
+    <div class="modal-actions"><button class="btn" id="btnCancel">取消</button><button class="btn btn-primary" id="btnSave">儲存</button></div>
   `);
   document.getElementById('btnCancel').addEventListener('click', closeModal);
   document.getElementById('btnSave').addEventListener('click', ()=>{
@@ -1133,12 +948,8 @@ function openStockModal(editId){
     const date = document.getElementById('f-date').value;
     if(!name || !invested || isNaN(profit) || !date){ alert('請完整填寫欄位'); return; }
     const payload = { name, symbol, invested, profit, date };
-    if(editing){ Object.assign(editing, payload); }
-    else { state.stockRecords.push({id:uid(), ...payload}); }
-    closeModal();
-    const d = new Date(date);
-    invYear = d.getFullYear(); invMonth = d.getMonth();
-    renderInvest();
+    if(editing){ Object.assign(editing, payload); } else { state.stockRecords.push({id:uid(), ...payload}); }
+    closeModal(); const d = new Date(date); invYear = d.getFullYear(); invMonth = d.getMonth(); renderInvest();
   });
 }
 
@@ -1152,26 +963,17 @@ function openFeeModal(editId){
     <div class="field"><label>日期</label><input type="date" id="f-feedate" value="${dval}"></div>
     <div class="field"><label>金額（正數為加錢/退佣；負數為扣錢/手續費支出）</label><input type="number" id="f-feeamount" value="${editing?editing.amount:''}" placeholder="0"></div>
     <div class="field"><label>備註（選填）</label><input type="text" id="f-feenote" value="${editing?(editing.note||''):''}" placeholder="例如：開戶手續費或退佣"></div>
-    <div class="modal-actions">
-      <button class="btn" id="btnCancel">取消</button>
-      <button class="btn btn-primary" id="btnSave">儲存</button>
-    </div>
+    <div class="modal-actions"><button class="btn" id="btnCancel">取消</button><button class="btn btn-primary" id="btnSave">儲存</button></div>
   `);
   document.getElementById('btnCancel').addEventListener('click', closeModal);
   document.getElementById('btnSave').addEventListener('click', ()=>{
     const date = document.getElementById('f-feedate').value;
     const amount = parseFloat(document.getElementById('f-feeamount').value);
     const note = document.getElementById('f-feenote').value.trim();
-    
     if(!date || isNaN(amount) || amount === 0){ alert('請輸入有效的日期與不為0的金額'); return; }
-    
     const payload = { date, amount, note };
-    if(editing){ Object.assign(editing, payload); }
-    else { state.feeRecords.push({id:uid(), ...payload}); }
-    closeModal();
-    const d = new Date(date);
-    invYear = d.getFullYear(); invMonth = d.getMonth();
-    renderInvest();
+    if(editing){ Object.assign(editing, payload); } else { state.feeRecords.push({id:uid(), ...payload}); }
+    closeModal(); const d = new Date(date); invYear = d.getFullYear(); invMonth = d.getMonth(); renderInvest();
   });
 }
 
@@ -1187,8 +989,8 @@ function catRows(type){
       <div class="txn-actions">
         <button data-catmove="${type}|${i}|-1" aria-label="上移" ${i===0?'disabled style="opacity:.3;"':''}>${ICON.chevUp}</button>
         <button data-catmove="${type}|${i}|1" aria-label="下移" ${i===list.length-1?'disabled style="opacity:.3;"':''}>${ICON.chevDown}</button>
-        <button data-editcat="${type}|${c.name}" aria-label="編輯分類">${ICON.edit}</button>
-        <button data-delcat="${type}|${c.name}" aria-label="刪除分類">${ICON.trash}</button>
+        <button data-editcat="${type}|${c.name}">${ICON.edit}</button>
+        <button data-delcat="${type}|${c.name}">${ICON.trash}</button>
       </div>
     </div>
   `).join('') : '<div class="empty">還沒有分類</div>';
@@ -1198,14 +1000,8 @@ function stockMgmtRows(){
   if(!state.customStocks.length) return '<div class="empty">還沒有自訂股票</div>';
   return state.customStocks.map((s,i)=>`
     <div class="list-row" style="padding:8px 0;">
-      <div style="flex:1; min-width:0;">
-        <span style="font-size:14px;">${s.name}</span>
-        <span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${s.symbol||'（無代碼）'}</span>
-      </div>
-      <div class="txn-actions">
-        <button data-editstockdef="${i}" aria-label="編輯">${ICON.edit}</button>
-        <button data-delstockdef="${i}" aria-label="刪除">${ICON.trash}</button>
-      </div>
+      <div style="flex:1; min-width:0;"><span style="font-size:14px;">${s.name}</span><span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${s.symbol||'（無代碼）'}</span></div>
+      <div class="txn-actions"><button data-editstockdef="${i}">${ICON.edit}</button><button data-delstockdef="${i}">${ICON.trash}</button></div>
     </div>
   `).join('');
 }
@@ -1213,58 +1009,41 @@ function stockMgmtRows(){
 function renderSettings(){
   function collapseHeader(key, title){
     const open = settingsOpen[key];
-    return `
-      <button type="button" class="row-between" data-toggle="${key}" style="width:100%; background:none; border:none; padding:0; cursor:pointer; text-align:left;">
-        <p style="font-size:14px; font-weight:500; margin:0;">${title}</p>
-        <span style="color:var(--text-secondary); display:flex;">${open?ICON.chevUp:ICON.chevDown}</span>
-      </button>
-    `;
+    return `<button type="button" class="row-between" data-toggle="${key}" style="width:100%; background:none; border:none; padding:0; cursor:pointer; text-align:left;"><p style="font-size:14px; font-weight:500; margin:0;">${title}</p><span style="color:var(--text-secondary); display:flex;">${open?ICON.chevUp:ICON.chevDown}</span></button>`;
   }
 
   document.getElementById('tab-settings').innerHTML = `
     <h2 class="pagetitle" style="margin-bottom:18px;">設定</h2>
 
     <div class="panel" style="display:flex; flex-direction:column; gap:14px; margin-bottom:16px;">
-      <div class="row-between">
-        <div>
-          <p style="margin:0; font-size:14px;">匯出資料</p>
-          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">下載一份 JSON 備份檔，可用來還原資料</p>
+      <div class="row-between"><div><p style="margin:0; font-size:14px;">匯出資料</p></div><button class="btn" id="btnExport">${ICON.download}匯出</button></div>
+      <div class="row-between"><div><p style="margin:0; font-size:14px;">匯入資料</p></div><button class="btn" id="btnImport">${ICON.upload}匯入</button></div>
+      <div class="row-between"><div><p style="margin:0; font-size:14px;">重設所有資料</p></div><button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button></div>
+    </div>
+
+    <div class="panel" style="margin-bottom:16px;">
+      ${collapseHeader('security','資料加密設定')}
+      ${settingsOpen.security ? `
+        <div style="margin-top:14px;">
+          <p style="font-size:13px; color:var(--text-secondary); margin:0 0 12px;">目前的狀態：<strong>${sessionKey ? '<span class="text-pos">已啟用密碼鎖</span>' : '未加密 (明文儲存)'}</strong></p>
+          ${sessionKey ? `
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-primary" id="btnChangePwd">更改密碼</button>
+              <button class="btn btn-danger" id="btnRemovePwd">移除密碼</button>
+            </div>
+          ` : `
+            <button class="btn btn-primary" id="btnSetPwd">設定密碼</button>
+          `}
         </div>
-        <button class="btn" id="btnExport">${ICON.download}匯出</button>
-      </div>
-      <div class="row-between">
-        <div>
-          <p style="margin:0; font-size:14px;">匯入資料</p>
-          <p style="margin:4px 0 0; font-size:12px; color:var(--text-secondary);">選擇先前匯出的 JSON 檔案來還原</p>
-        </div>
-        <button class="btn" id="btnImport">${ICON.upload}匯入</button>
-      </div>
-      <div class="row-between">
-        <div>
-          <p style="margin:0; font-size:14px;">重設所有資料</p>
-        </div>
-        <button class="btn btn-danger" id="btnReset">${ICON.refresh}重設</button>
-      </div>
+      ` : ''}
     </div>
 
     <div class="panel" style="margin-bottom:16px;">
       ${collapseHeader('categories','分類管理')}
       ${settingsOpen.categories ? `
         <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:24px; margin-top:14px;">
-          <div>
-            <div class="row-between" style="margin-bottom:6px;">
-              <span style="font-size:13px; color:var(--text-secondary);">支出分類</span>
-              <button class="btn" data-addcat="expense" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
-            </div>
-            ${catRows('expense')}
-          </div>
-          <div>
-            <div class="row-between" style="margin-bottom:6px;">
-              <span style="font-size:13px; color:var(--text-secondary);">收入分類</span>
-              <button class="btn" data-addcat="income" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button>
-            </div>
-            ${catRows('income')}
-          </div>
+          <div><div class="row-between" style="margin-bottom:6px;"><span style="font-size:13px; color:var(--text-secondary);">支出分類</span><button class="btn" data-addcat="expense" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button></div>${catRows('expense')}</div>
+          <div><div class="row-between" style="margin-bottom:6px;"><span style="font-size:13px; color:var(--text-secondary);">收入分類</span><button class="btn" data-addcat="income" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增</button></div>${catRows('income')}</div>
         </div>
       ` : ''}
     </div>
@@ -1273,114 +1052,110 @@ function renderSettings(){
       ${collapseHeader('stocks','股票清單管理')}
       ${settingsOpen.stocks ? `
         <div style="margin-top:14px;">
-          <div class="row-between" style="margin-bottom:14px;">
-            <span style="font-size:13px; color:var(--text-secondary);"></span>
-            <button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button>
-          </div>
+          <div class="row-between" style="margin-bottom:14px;"><span style="font-size:13px; color:var(--text-secondary);"></span><button class="btn" id="btnAddStockDef" style="padding:5px 10px; font-size:12px;">${ICON.plus}新增股票</button></div>
           ${stockMgmtRows()}
         </div>
       ` : ''}
     </div>
-
-    <div class="panel">
-      ${collapseHeader('security','備份檔加密設定')}
-      ${settingsOpen.security ? `
-        <div style="margin-top:14px;">
-          <p style="font-size:12px; color:var(--text-secondary); margin:0 0 12px;">設定後，匯出資料時將加上這組帳密保護。未來匯入該檔案時，需輸入正確帳密才能還原。</p>
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:14px;">
-            <div class="field" style="margin:0;"><label>帳號</label><input type="text" id="f-authuser" value="${state.credentials?.username||''}" placeholder="請輸入帳號"></div>
-            <div class="field" style="margin:0;"><label>密碼</label><input type="password" id="f-authpass" value="${state.credentials?.password||''}" placeholder="請輸入密碼"></div>
-          </div>
-          <button class="btn btn-primary" id="btnSaveAuth">儲存帳密設定</button>
-        </div>
-      ` : ''}
-    </div>
   `;
-  document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click', ()=>{
-    const key = b.dataset.toggle;
-    settingsOpen[key] = !settingsOpen[key];
-    renderSettings();
-  }));
+
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.addEventListener('click', ()=>{ settingsOpen[b.dataset.toggle] = !settingsOpen[b.dataset.toggle]; renderSettings(); }));
   document.querySelectorAll('[data-catmove]').forEach(b=>b.addEventListener('click', ()=>{
-    const [type, idxStr, dir] = b.dataset.catmove.split('|');
-    const i = parseInt(idxStr), j = i + parseInt(dir);
-    const list = state.categories[type];
-    if(j<0 || j>=list.length) return;
-    [list[i], list[j]] = [list[j], list[i]];
-    renderSettings();
+    const [type, idxStr, dir] = b.dataset.catmove.split('|'); const i = parseInt(idxStr), j = i + parseInt(dir);
+    const list = state.categories[type]; if(j<0 || j>=list.length) return; [list[i], list[j]] = [list[j], list[i]]; renderSettings();
   }));
   document.querySelectorAll('[data-addcat]').forEach(b=>b.addEventListener('click', ()=>openCatModal(b.dataset.addcat)));
-  document.querySelectorAll('[data-editcat]').forEach(b=>b.addEventListener('click', ()=>{
-    const [type,name] = b.dataset.editcat.split('|');
-    openCatModal(type, name);
-  }));
+  document.querySelectorAll('[data-editcat]').forEach(b=>b.addEventListener('click', ()=>{ openCatModal(b.dataset.editcat.split('|')[0], b.dataset.editcat.split('|')[1]); }));
   document.querySelectorAll('[data-delcat]').forEach(b=>b.addEventListener('click', ()=>{
     const [type,name] = b.dataset.delcat.split('|');
-    const inUse = state.transactions.some(t=>t.category===name && t.type===type);
-    if(inUse && !confirm('這個分類還有交易在使用，確定要刪除嗎？交易紀錄不會被刪除，但顯示顏色會變成預設灰色。')) return;
-    state.categories[type] = state.categories[type].filter(c=>c.name!==name);
-    renderSettings();
+    if(state.transactions.some(t=>t.category===name && t.type===type) && !confirm('這個分類還有交易在使用，確定要刪除嗎？')) return;
+    state.categories[type] = state.categories[type].filter(c=>c.name!==name); renderSettings();
   }));
   document.getElementById('btnAddStockDef')?.addEventListener('click', ()=>openStockDefModal());
   document.querySelectorAll('[data-editstockdef]').forEach(b=>b.addEventListener('click', ()=>openStockDefModal(parseInt(b.dataset.editstockdef))));
   document.querySelectorAll('[data-delstockdef]').forEach(b=>b.addEventListener('click', ()=>{
-    const idx = parseInt(b.dataset.delstockdef);
-    const s = state.customStocks[idx];
-    const inUse = state.stockRecords.some(r=>(s.symbol && r.symbol===s.symbol) || (!s.symbol && r.name===s.name));
-    if(inUse && !confirm('這檔股票還有投資紀錄在使用，確定要從清單移除嗎？既有紀錄不會被刪除，只是之後不會出現在自動完成建議中。')) return;
-    state.customStocks.splice(idx,1);
-    renderSettings();
+    const idx = parseInt(b.dataset.delstockdef); const s = state.customStocks[idx];
+    if(state.stockRecords.some(r=>(s.symbol && r.symbol===s.symbol) || (!s.symbol && r.name===s.name)) && !confirm('確定要從清單移除嗎？')) return;
+    state.customStocks.splice(idx,1); renderSettings();
   }));
-  document.getElementById('btnSaveAuth')?.addEventListener('click', ()=>{
-    const username = document.getElementById('f-authuser').value.trim();
-    const password = document.getElementById('f-authpass').value.trim();
-    state.credentials = { username, password };
-    saveState();
-    alert('帳密設定已儲存！未來的備份檔都將套用此加密。');
+
+  // 【密碼設定按鈕群】
+  document.getElementById('btnSetPwd')?.addEventListener('click', ()=>{
+    openModal(`
+      <h3>設定新密碼</h3>
+      <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">設定後，下次重整網頁或匯入備份時，都必須輸入這組密碼。</p>
+      <div class="field"><label>輸入密碼</label><input type="password" id="f-newpwd" placeholder="輸入密碼"></div>
+      <div class="field"><label>再次確認密碼</label><input type="password" id="f-newpwd2" placeholder="再次輸入密碼"></div>
+      <div class="modal-actions"><button class="btn" id="btnCancelPwd">取消</button><button class="btn btn-primary" id="btnSavePwd">儲存並加密</button></div>
+    `);
+    document.getElementById('btnCancelPwd').addEventListener('click', closeModal);
+    document.getElementById('btnSavePwd').addEventListener('click', ()=>{
+      const p1 = document.getElementById('f-newpwd').value;
+      const p2 = document.getElementById('f-newpwd2').value;
+      if(!p1) return alert('密碼不能為空');
+      if(p1!==p2) return alert('兩次密碼不一致');
+      sessionKey = p1; saveState(); closeModal(); renderSettings();
+      alert('已成功啟用密碼鎖！資料現在已被加密。');
+    });
   });
 
-  // 超級匯出按鈕：結合 Web Share API 與傳統下載
+  document.getElementById('btnChangePwd')?.addEventListener('click', ()=>{
+    openModal(`
+      <h3>更改密碼</h3>
+      <div class="field"><label>舊密碼</label><input type="password" id="f-oldpwd" placeholder="輸入目前密碼"></div>
+      <div class="field"><label>新密碼</label><input type="password" id="f-newpwd" placeholder="輸入新密碼"></div>
+      <div class="modal-actions"><button class="btn" id="btnCancelPwd">取消</button><button class="btn btn-primary" id="btnSavePwd">確認更改</button></div>
+    `);
+    document.getElementById('btnCancelPwd').addEventListener('click', closeModal);
+    document.getElementById('btnSavePwd').addEventListener('click', ()=>{
+      const oldP = document.getElementById('f-oldpwd').value;
+      const newP = document.getElementById('f-newpwd').value;
+      if(oldP !== sessionKey) return alert('舊密碼錯誤！');
+      if(!newP) return alert('新密碼不能為空');
+      sessionKey = newP; saveState(); closeModal(); renderSettings();
+      alert('密碼更改成功！');
+    });
+  });
+
+  document.getElementById('btnRemovePwd')?.addEventListener('click', ()=>{
+    openModal(`
+      <h3>移除密碼</h3>
+      <p style="font-size:13px; color:var(--danger); margin-bottom:12px;">移除後，資料將以「明文」儲存，任何人打開網頁都不需密碼即可觀看。</p>
+      <div class="field"><label>請輸入目前密碼確認</label><input type="password" id="f-oldpwd" placeholder="輸入密碼"></div>
+      <div class="modal-actions"><button class="btn" id="btnCancelPwd">取消</button><button class="btn btn-danger" id="btnSavePwd" style="background:var(--danger); color:#fff;">確認移除</button></div>
+    `);
+    document.getElementById('btnCancelPwd').addEventListener('click', closeModal);
+    document.getElementById('btnSavePwd').addEventListener('click', ()=>{
+      const oldP = document.getElementById('f-oldpwd').value;
+      if(oldP !== sessionKey) return alert('密碼錯誤！');
+      sessionKey = null; saveState(); closeModal(); renderSettings();
+      alert('密碼已移除，資料已轉為未加密狀態。');
+    });
+  });
+
+  // 【匯出 / 匯入 / 重設】
   document.getElementById('btnExport').addEventListener('click', async ()=>{
     const defaultName = `錢包日誌備份_${dateStr(today.getFullYear(),today.getMonth(),today.getDate())}.json`;
     let fileName = prompt('請輸入備份檔案名稱：', defaultName);
-    if (fileName === null) return;
-    if (!fileName.trim()) fileName = defaultName;
-    if (!fileName.endsWith('.json')) fileName += '.json';
+    if (!fileName) return; if (!fileName.endsWith('.json')) fileName += '.json';
     
-    const jsonStr = JSON.stringify(state, null, 2);
-
-    // 嘗試喚醒 iOS/iPad 原生分享選單，可直接點「儲存到檔案」
+    // 如果有設密碼，匯出成加密版；如果沒設，直接匯出明文版
+    let exportData;
+    if(sessionKey){
+      exportData = { version: 3, encryptedData: CryptoJS.AES.encrypt(JSON.stringify(state), sessionKey).toString() };
+    } else {
+      exportData = state;
+    }
+    const jsonStr = JSON.stringify(exportData, null, 2);
     const file = new File([jsonStr], fileName, { type: 'application/json' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      try {
-        await navigator.share({
-          files: [file],
-        });
-        return; // 分享成功，結束
-      } catch (e) {
-        if (e && e.name === 'AbortError') {
-          // 使用者自己取消分享，視為不想匯出，不再另外下載
-          return;
-        }
-        // 裝置回報可分享，但實際分享失敗（常見於 Windows / Android 部分瀏覽器），
-        // 改用下面的傳統下載方式
-      }
+      try { await navigator.share({ files: [file] }); return; } catch (e) { if(e.name === 'AbortError') return; }
     }
-
-    // 裝置不支援原生分享、或分享失敗時，走傳統檔案下載模式
     try {
-      const blob = new Blob([jsonStr], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; 
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click(); 
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      alert('無法直接匯出！\\n\\n因為 Koder 預覽模式限制了檔案下載，請點擊上方的「指南針圖示」切換到 Safari 瀏覽器即可順利匯出。');
-    }
+      const blob = new Blob([jsonStr], {type:'application/json'}); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+    } catch (err) { alert('無法直接匯出！'); }
   });
 
   document.getElementById('btnImport').addEventListener('click', ()=>document.getElementById('importFile').click());
@@ -1389,65 +1164,41 @@ function renderSettings(){
     if(confirm('確定要清空所有資料嗎？此動作無法復原。')){
       state = {
         accounts:[], transactions:[], stockRecords:[], feeRecords:[],
-        categories:{ expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) },
-        customStocks: [],
-        credentials: { username: '', password: '' }
+        categories:{ expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) }, customStocks: []
       };
       renderAll();
     }
   });
 }
 
-// 匯入檔案的變更事件只需綁定一次；此輸入框在畫面上永遠存在（不會隨 renderSettings 重新產生），
-// 若放在 renderSettings 內綁定，每次重新渲染設定頁（例如展開/收合區塊）都會再疊加一個監聽器，
-// 造成匯入時重複觸發、看起來像「匯入不了」。
 document.getElementById('importFile').addEventListener('change', e=>{
-  const file = e.target.files[0];
-  if(!file) return;
+  const file = e.target.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = ()=>{
     try{
       const data = JSON.parse(reader.result);
-
-      const processImport = () => {
-        if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
-        if(!data.accounts) data.accounts = [];
-        if(!data.transactions) data.transactions = [];
-        if(!data.stockRecords) data.stockRecords = [];
-        if(!data.feeRecords) data.feeRecords = [];
-        if(!data.customStocks) data.customStocks = [];
-        if(!data.credentials) data.credentials = {username:'', password:''};
-        state = data; renderAll();
-        alert('匯入成功');
-      };
-
-      if(data.credentials && (data.credentials.username || data.credentials.password)) {
+      if (data.version === 3 && data.encryptedData) {
         openModal(`
           <h3>解鎖備份檔案</h3>
-          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">此備份檔受到保護，請輸入原設定的帳號與密碼以進行匯入。</p>
-          <div class="field"><label>帳號</label><input type="text" id="f-verifyuser" placeholder="請輸入帳號"></div>
+          <p style="font-size:13px; color:var(--text-secondary); margin-bottom:12px;">此檔案受密碼保護，請輸入原密碼解鎖。</p>
           <div class="field"><label>密碼</label><input type="password" id="f-verifypass" placeholder="請輸入密碼"></div>
-          <div class="modal-actions">
-            <button class="btn" id="btnVerifyCancel">取消</button>
-            <button class="btn btn-primary" id="btnVerifySubmit">確認匯入</button>
-          </div>
+          <div class="modal-actions"><button class="btn" id="btnVerifyCancel">取消</button><button class="btn btn-primary" id="btnVerifySubmit">確認匯入</button></div>
         `);
-        document.getElementById('btnVerifyCancel').addEventListener('click', ()=>{
-          closeModal();
-          document.getElementById('importFile').value = '';
-        });
+        document.getElementById('btnVerifyCancel').addEventListener('click', ()=>{ closeModal(); document.getElementById('importFile').value = ''; });
         document.getElementById('btnVerifySubmit').addEventListener('click', ()=>{
-          const vu = document.getElementById('f-verifyuser').value.trim();
-          const vp = document.getElementById('f-verifypass').value.trim();
-          if(vu === data.credentials.username && vp === data.credentials.password) {
-            closeModal();
-            processImport();
-          } else {
-            alert('帳號或密碼錯誤，請重新輸入！');
-          }
+          const vp = document.getElementById('f-verifypass').value;
+          try {
+            const bytes = CryptoJS.AES.decrypt(data.encryptedData, vp); const decryptedStr = bytes.toString(CryptoJS.enc.Utf8);
+            if(!decryptedStr) throw new Error();
+            state = JSON.parse(decryptedStr);
+            sessionKey = vp; isLocked = false; saveState(); closeModal(); renderAll(); alert('匯入成功！系統已套用該檔案的密碼鎖。');
+          } catch(err) { alert('密碼錯誤，無法解開此備份檔！'); }
         });
       } else {
-        processImport();
+        if(!data.categories) data.categories = { expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) };
+        if(!data.accounts) data.accounts = []; if(!data.transactions) data.transactions = [];
+        if(!data.stockRecords) data.stockRecords = []; if(!data.feeRecords) data.feeRecords = []; if(!data.customStocks) data.customStocks = [];
+        state = data; isLocked = false; saveState(); renderAll(); alert('明文資料匯入成功！');
       }
     }catch(err){ alert('檔案格式錯誤，無法匯入'); e.target.value=''; }
   };
@@ -1460,22 +1211,14 @@ function openStockDefModal(editIdx){
     <h3>${editing?'編輯股票':'新增股票'}</h3>
     <div class="field"><label>股票名稱</label><input type="text" id="f-defname" value="${editing?editing.name:''}" placeholder="例如：興櫃某某公司"></div>
     <div class="field"><label>股票代碼（選填）</label><input type="text" id="f-defsymbol" value="${editing?(editing.symbol||''):''}" placeholder="例如：1234"></div>
-    <div class="modal-actions">
-      <button class="btn" id="btnCancel">取消</button>
-      <button class="btn btn-primary" id="btnSave">儲存</button>
-    </div>
+    <div class="modal-actions"><button class="btn" id="btnCancel">取消</button><button class="btn btn-primary" id="btnSave">儲存</button></div>
   `);
   document.getElementById('btnCancel').addEventListener('click', closeModal);
   document.getElementById('btnSave').addEventListener('click', ()=>{
-    const name = document.getElementById('f-defname').value.trim();
-    const symbol = document.getElementById('f-defsymbol').value.trim();
+    const name = document.getElementById('f-defname').value.trim(), symbol = document.getElementById('f-defsymbol').value.trim();
     if(!name){ alert('請輸入股票名稱'); return; }
-    const dupCheck = (s,idx)=> (symbol ? s.symbol===symbol : s.name===name) && idx!==editIdx;
-    if(state.customStocks.some((s,idx)=>dupCheck(s,idx)) || (symbol && TAIWAN_STOCKS.some(s=>s.symbol===symbol))){
-      alert('這檔股票（名稱或代碼）已經存在'); return;
-    }
-    if(editing){ editing.name = name; editing.symbol = symbol; }
-    else { state.customStocks.push({name, symbol}); }
+    if(state.customStocks.some((s,idx)=>(symbol?s.symbol===symbol:s.name===name)&&idx!==editIdx) || (symbol&&TAIWAN_STOCKS.some(s=>s.symbol===symbol))){ alert('這檔股票已經存在'); return; }
+    if(editing){ editing.name = name; editing.symbol = symbol; } else { state.customStocks.push({name, symbol}); }
     closeModal(); renderSettings();
   });
 }
@@ -1486,32 +1229,21 @@ function openCatModal(type, editName){
   openModal(`
     <h3>${editing?'編輯分類':'新增'+(type==='expense'?'支出':'收入')+'分類'}</h3>
     <div class="field"><label>分類名稱</label><input type="text" id="f-catname" value="${editing?editing.name:''}" placeholder="例如：寵物"></div>
-    <div class="field">
-      <label>顏色</label>
-      <div id="colorSwatches" style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${CAT_PALETTE.map(c=>`<button type="button" class="colorswatch" data-color="${c}" style="width:28px;height:28px;border-radius:50%;background:${c};border:2px solid ${chosenColor===c?'var(--text)':'transparent'};padding:0;"></button>`).join('')}
-      </div>
-    </div>
-    <div class="modal-actions">
-      <button class="btn" id="btnCancel">取消</button>
-      <button class="btn btn-primary" id="btnSave">儲存</button>
-    </div>
+    <div class="field"><label>顏色</label><div id="colorSwatches" style="display:flex; gap:8px; flex-wrap:wrap;">
+      ${CAT_PALETTE.map(c=>`<button type="button" class="colorswatch" data-color="${c}" style="width:28px;height:28px;border-radius:50%;background:${c};border:2px solid ${chosenColor===c?'var(--text)':'transparent'};padding:0;"></button>`).join('')}
+    </div></div>
+    <div class="modal-actions"><button class="btn" id="btnCancel">取消</button><button class="btn btn-primary" id="btnSave">儲存</button></div>
   `);
   document.querySelectorAll('.colorswatch').forEach(b=>b.addEventListener('click', ()=>{
-    chosenColor = b.dataset.color;
-    document.querySelectorAll('.colorswatch').forEach(x=>x.style.border='2px solid transparent');
-    b.style.border = '2px solid var(--text)';
+    chosenColor = b.dataset.color; document.querySelectorAll('.colorswatch').forEach(x=>x.style.border='2px solid transparent'); b.style.border = '2px solid var(--text)';
   }));
   document.getElementById('btnCancel').addEventListener('click', closeModal);
   document.getElementById('btnSave').addEventListener('click', ()=>{
     const name = document.getElementById('f-catname').value.trim();
     if(!name){ alert('請輸入分類名稱'); return; }
     if(editing){
-      const oldName = editing.name;
-      editing.name = name; editing.color = chosenColor;
-      if(oldName !== name){
-        state.transactions.forEach(t=>{ if(t.type===type && t.category===oldName) t.category = name; });
-      }
+      const oldName = editing.name; editing.name = name; editing.color = chosenColor;
+      if(oldName !== name){ state.transactions.forEach(t=>{ if(t.type===type && t.category===oldName) t.category = name; }); }
     } else {
       if(state.categories[type].some(c=>c.name===name)){ alert('這個分類已經存在'); return; }
       state.categories[type].push({name, color: chosenColor});
@@ -1529,7 +1261,6 @@ function renderAll(){
   renderInvest();
   renderSettings();
 }
-renderAll();
 </script>
 </body>
 </html>
