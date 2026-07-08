@@ -1166,7 +1166,14 @@ function renderSettings(){
         accounts:[], transactions:[], stockRecords:[], feeRecords:[],
         categories:{ expense: DEFAULT_EXPENSE_CATS.map(c=>({...c})), income: DEFAULT_INCOME_CATS.map(c=>({...c})) }, customStocks: []
       };
-      renderAll();
+      
+      // 新增：徹底銷毀密碼鎖
+      sessionKey = null;   // 清空暫存密碼
+      isLocked = false;    // 解除系統鎖定狀態
+      localStorage.removeItem(STORAGE_KEY); // 刪除硬碟裡的加密檔
+      
+      renderAll(); // 重新渲染並存成乾淨的明文空檔
+      alert('資料已全部清空！');
     }
   });
 }
